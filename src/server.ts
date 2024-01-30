@@ -1,15 +1,12 @@
-import "reflect-metadata";
 import express from "express";
-import { Container } from "typedi";
-import { UserController } from "./controllers/UserController";
+import userRoutes from "./routes/UserRoutes";
 
 const app = express();
-const port = 1167;
 
-const userController = Container.get(UserController);
+app.use(express.json());
 
-app.get("/users", (req, res) => userController.getUsers(req, res));
+app.use("/api", userRoutes);
 
-app.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`);
+app.listen(3000, () => {
+  console.log("Server running on port 3000");
 });

@@ -1,16 +1,13 @@
 import { Service } from "typedi";
-import sqlite3 from "sqlite3";
-import { open, Database } from "sqlite";
+import { Database } from "sqlite";
+import * as DatabaseUtils from "../utils/database";
 
 @Service()
 export class DatabaseService {
   private db: Database | null = null;
 
   async connect() {
-    this.db = await open({
-      filename: "path/to/database.db",
-      driver: sqlite3.Database,
-    });
+    this.db = await DatabaseUtils.openDatabase();
   }
 
   async close() {

@@ -1,13 +1,18 @@
-import { Service } from "typedi";
 import { Request, Response } from "express";
-import { DatabaseService } from "../services/DatabaseService";
+import UserService from "../services/UserService";
 
-@Service()
-export class UserController {
-  constructor(private databaseService: DatabaseService) {}
+class UserController {
+  private userService: UserService;
 
-  public getUsers(req: Request, res: Response): void {
-    const users = this.databaseService.getUsers();
-    res.json(users);
+  constructor(userService: UserService) {
+    this.userService = userService;
+  }
+
+  public async createUser(req: Request, res: Response): Promise<void> {
+    const { username } = req.body;
+    const user = await this.userService.createUser(username);
+    res.json(user);
   }
 }
+
+export default UserController;
