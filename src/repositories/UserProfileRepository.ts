@@ -59,6 +59,23 @@ class UserProfileRepository implements IUserProfileRepository {
     const db = await openDatabase();
     await db.run("DELETE FROM UserProfiles WHERE id = ?", [id]);
   }
-}
 
+  async findAll(): Promise<UserProfile[]> {
+    const db = await openDatabase();
+    const rows = await db.all("SELECT * FROM UserProfiles");
+
+    return rows.map(
+      (row) =>
+        new UserProfile(
+          row.id,
+          row.email,
+          row.color,
+          row.phoneNumber,
+          row.image,
+          new Date(row.createDate),
+          new Date(row.modifyDate)
+        )
+    );
+  }
+}
 export default UserProfileRepository;

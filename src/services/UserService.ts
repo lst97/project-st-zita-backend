@@ -2,6 +2,7 @@ import { CreateUserForm } from "../models/Forms/CreateUserForm";
 import User from "../models/database/User";
 import UserProfileService from "./UserProfileService";
 import UserRepository from "../repositories/UserRepository";
+import UserData from "../models/share/UserData";
 
 class UserService {
   private userProfileService: UserProfileService;
@@ -18,12 +19,32 @@ class UserService {
   public async createUser(userForm: CreateUserForm): Promise<User> {
     const user = new User(userForm.username);
     this.userRepository.create(user);
-    await this.userProfileService.createProfile(user.id, userForm);
+    await this.userProfileService.createProfile(user, userForm);
     // create user profile
     return user;
   }
 
-  // Other user-related business logic
+  public async getAllUser(): Promise<UserData[]> {
+    let users = await this.userRepository.findAll();
+    let userProfiles = await this.userProfileService.getAllProfiles();
+    let userDataList = new Array<UserData>();
+
+    users.map((user) => {
+      let profile = userProfiles.find((p) => p.id === user.id);
+      if (profile) {
+        let userData = new UserData(
+          user.username,
+          profile.email,
+          profile.color,
+          profile.image,
+          profile.phoneNumber
+        );
+        userDataList.push(userData);
+      }
+    });
+
+    return userDataList;
+  }
 }
 
 export default UserService;

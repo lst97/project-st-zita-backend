@@ -15,6 +15,11 @@ class UserController {
     const user = await this.userService.createUser(createUserForm);
     res.json(user);
   }
+
+  public async getAllUser(req: Request, res: Response): Promise<void> {
+    const users = await this.userService.getAllUser();
+    res.json(users);
+  }
 }
 
 export default UserController;

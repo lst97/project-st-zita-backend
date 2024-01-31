@@ -25,6 +25,14 @@ class UserProfileService {
     await this.userProfileRepository.create(userProfile);
     return user;
   }
+
+  public async getProfile(userId: string): Promise<UserProfile | null> {
+    return await this.userProfileRepository.findById(userId);
+  }
+
+  public async getAllProfiles(): Promise<UserProfile[]> {
+    return await this.userProfileRepository.findAll();
+  }
 }
 
 export default UserProfileService;
