@@ -1,20 +1,35 @@
-export class UserProfile {
+class UserProfile {
   id: string;
-  username: string;
   email: string;
-  phoneNumber: string;
+  phoneNumber?: string;
+  color: string;
+  image?: string;
   createDate: Date = new Date();
   modifyDate: Date = new Date();
 
   constructor(
     id: string,
-    username: string,
     email: string,
-    phoneNumber: string
+    color: string,
+    phoneNumber?: string,
+    image?: string,
+    createDate?: Date,
+    modifyDate?: Date
   ) {
+    if (createDate) {
+      this.createDate = createDate;
+    }
+    if (modifyDate) {
+      this.modifyDate = modifyDate;
+    }
+    if (image) {
+      this.image = image;
+    }
     this.id = id;
-    this.username = username;
     this.phoneNumber = phoneNumber;
     this.email = email;
+    this.color = color;
   }
 }
+
+export default UserProfile;

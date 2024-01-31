@@ -5,8 +5,22 @@ class User {
   createDate: Date = new Date();
   modifyDate: Date = new Date();
 
-  constructor(username: string) {
+  constructor(
+    username: string,
+    id?: string,
+    createDate?: Date,
+    modifyDate?: Date
+  ) {
+    if (createDate) {
+      this.createDate = createDate;
+    }
+    if (modifyDate) {
+      this.modifyDate = modifyDate;
+    }
     this.username = username;
+    if (id) {
+      this.id = id;
+    }
   }
 }
 

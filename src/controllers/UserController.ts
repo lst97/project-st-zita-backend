@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import UserService from "../services/UserService";
+import { CreateUserForm } from "../models/Forms/CreateUserForm";
 
 class UserController {
   private userService: UserService;
@@ -9,8 +10,9 @@ class UserController {
   }
 
   public async createUser(req: Request, res: Response): Promise<void> {
-    const { username } = req.body;
-    const user = await this.userService.createUser(username);
+    const createUserForm = req.body as CreateUserForm;
+
+    const user = await this.userService.createUser(createUserForm);
     res.json(user);
   }
 }
