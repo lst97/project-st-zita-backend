@@ -16,7 +16,7 @@ const userService = new UserService(userProfileService, userRepository);
 const userController = new UserController(userService);
 
 router.post("/user", (req, res) => userController.createUser(req, res));
-router.get("/user", (req, res) => userController.getAllUser(req, res));
+router.get("/user", (req, res) => userController.getAllUserData(req, res));
 
 // Other route definitions
 

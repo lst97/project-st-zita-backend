@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import UserService from "../services/UserService";
-import { CreateUserForm } from "../models/Forms/CreateUserForm";
+import { CreateUserForm } from "../models/forms/CreateUserForm";
 
 class UserController {
   private userService: UserService;
@@ -16,8 +16,8 @@ class UserController {
     res.json(user);
   }
 
-  public async getAllUser(req: Request, res: Response): Promise<void> {
-    const users = await this.userService.getAllUser();
+  public async getAllUserData(req: Request, res: Response): Promise<void> {
+    const users = await this.userService.getAllUserData();
     res.json(users);
   }
 }

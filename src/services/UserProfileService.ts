@@ -1,4 +1,4 @@
-import { CreateUserForm } from "../models/Forms/CreateUserForm";
+import { CreateUserForm } from "../models/forms/CreateUserForm";
 import User from "../models/database/User";
 import UserProfileRepository from "../repositories/UserProfileRepository";
 import UserProfile from "../models/database/UserProfile";

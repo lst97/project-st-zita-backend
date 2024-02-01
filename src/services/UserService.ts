@@ -1,4 +1,4 @@
-import { CreateUserForm } from "../models/Forms/CreateUserForm";
+import { CreateUserForm } from "../models/forms/CreateUserForm";
 import User from "../models/database/User";
 import UserProfileService from "./UserProfileService";
 import UserRepository from "../repositories/UserRepository";
@@ -24,7 +24,13 @@ class UserService {
     return user;
   }
 
-  public async getAllUser(): Promise<UserData[]> {
+  public async getUserIdByUsername(username: string): Promise<string | null> {
+    const user = await this.userRepository.findByUsername(username);
+    const userId = user ? user.id : null;
+    return userId;
+  }
+
+  public async getAllUserData(): Promise<UserData[]> {
     let users = await this.userRepository.findAll();
     let userProfiles = await this.userProfileService.getAllProfiles();
     let userDataList = new Array<UserData>();
@@ -44,6 +50,10 @@ class UserService {
     });
 
     return userDataList;
+  }
+
+  public async getAllUsers(): Promise<User[]> {
+    return await this.userRepository.findAll();
   }
 }
 

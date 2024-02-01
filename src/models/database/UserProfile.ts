@@ -1,4 +1,4 @@
-class UserProfile {
+class UserProfileDbModel {
   id: string;
   email: string;
   phoneNumber?: string;
@@ -32,4 +32,4 @@ class UserProfile {
   }
 }
 
-export default UserProfile;
+export default UserProfileDbModel;

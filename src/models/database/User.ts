@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
-class User {
+class UserDbModel {
   id: string = uuidv4();
   username: string;
   createDate: Date = new Date();
@@ -24,4 +24,4 @@ class User {
   }
 }
 
-export default User;
+export default UserDbModel;

@@ -1,11 +1,17 @@
-// UserRepository.ts
-
 import { openDatabase } from "../utils/database";
-import User from "../models/database/User";
+import UserDbModel from "../models/database/User";
 import IUserRepository from "../repositories/interfaces/IUserRepository";
 
 class UserRepository implements IUserRepository {
-  async create(user: User): Promise<User> {
+  async findByUsername(username: string): Promise<UserDbModel | null> {
+    const db = await openDatabase();
+    const user = await db.get("SELECT * FROM Users WHERE username = ?", [
+      username,
+    ]);
+    return user ? new UserDbModel(user.username, user.id) : null;
+  }
+
+  async create(user: UserDbModel): Promise<UserDbModel> {
     const db = await openDatabase();
     await db.run(
       "INSERT INTO Users (id, username, createDate, modifyDate) VALUES (?, ?, ?, ?)",
@@ -19,18 +25,18 @@ class UserRepository implements IUserRepository {
     return user;
   }
 
-  async findById(id: string): Promise<User | null> {
+  async findById(id: string): Promise<UserDbModel | null> {
     const db = await openDatabase();
     const user = await db.get("SELECT * FROM Users WHERE id = ?", [id]);
-    return user ? new User(user.username, user.id) : null;
+    return user ? new UserDbModel(user.username, user.id) : null;
   }
 
-  async findAll(): Promise<User[]> {
+  async findAll(): Promise<UserDbModel[]> {
     const db = await openDatabase();
     const users = await db.all("SELECT * FROM Users");
     return users.map(
       (u) =>
-        new User(
+        new UserDbModel(
           u.username,
           u.id,
           new Date(u.createDate),
@@ -39,7 +45,7 @@ class UserRepository implements IUserRepository {
     );
   }
 
-  async update(user: User): Promise<User> {
+  async update(user: UserDbModel): Promise<UserDbModel> {
     const db = await openDatabase();
     await db.run("UPDATE Users SET username = ?, modifyDate = ? WHERE id = ?", [
       user.username,
