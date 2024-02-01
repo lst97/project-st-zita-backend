@@ -15,8 +15,8 @@ class UserAppointmentController {
     }
     createAppointments(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            const createAppointmentForm = req.body;
-            yield this.appointmentService.createAppointments(createAppointmentForm);
+            const appointsData = req.body;
+            yield this.appointmentService.createAppointments(appointsData);
             res.json({ data: true });
         });
     }
@@ -29,7 +29,7 @@ class UserAppointmentController {
     // week_number + year = 142024
     getAllAppointmentsByWeekViewId(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { weekViewId } = req.params;
+            const weekViewId = req.params.id;
             const appointments = yield this.appointmentService.getAllAppointmentsByWeekViewId(weekViewId);
             res.json({ data: appointments });
         });

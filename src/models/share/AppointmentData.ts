@@ -10,9 +10,9 @@ export class AppointmentData {
     username: string,
     groupId: string,
     weekViewId: string,
-    location: string,
     startDate: string,
-    endDate: string
+    endDate: string,
+    location: string
   ) {
     this.username = username;
     this.groupId = groupId;

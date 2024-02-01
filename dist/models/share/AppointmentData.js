@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppointmentData = void 0;
 class AppointmentData {
-    constructor(username, groupId, weekViewId, location, startDate, endDate) {
+    constructor(username, groupId, weekViewId, startDate, endDate, location) {
         this.username = username;
         this.groupId = groupId;
         this.weekViewId = weekViewId;

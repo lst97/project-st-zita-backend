@@ -1,4 +1,3 @@
-import { CreateAppointmentForm } from "../models/forms/CreateAppointmentForm";
 import UserService from "./UserService";
 import UserAppointmentDbModel from "../models/database/UserAppointment";
 import { v4 as uuidv4 } from "uuid";
@@ -18,7 +17,7 @@ class AppointmentService {
   }
 
   public async createAppointments(
-    appointmentForm: CreateAppointmentForm
+    appointmentsData: AppointmentData[]
   ): Promise<boolean> {
     const users = await this.userService.getAllUsers();
     const userIdMap = new Map<string, string>();
@@ -27,7 +26,7 @@ class AppointmentService {
     });
 
     const appointmentsDbModels = new Array<UserAppointmentDbModel>();
-    appointmentForm.appointments.forEach((appointment) => {
+    appointmentsData.forEach((appointment) => {
       const userId = userIdMap.get(appointment.username);
 
       if (userId) {

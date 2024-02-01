@@ -20,7 +20,7 @@ class AppointmentService {
         this.userService = userService;
         this.appointmentRepository = appointmentRepository;
     }
-    createAppointments(appointmentForm) {
+    createAppointments(appointmentsData) {
         return __awaiter(this, void 0, void 0, function* () {
             const users = yield this.userService.getAllUsers();
             const userIdMap = new Map();
@@ -28,7 +28,7 @@ class AppointmentService {
                 userIdMap.set(user.username, user.id);
             });
             const appointmentsDbModels = new Array();
-            appointmentForm.appointments.forEach((appointment) => {
+            appointmentsData.forEach((appointment) => {
                 const userId = userIdMap.get(appointment.username);
                 if (userId) {
                     const appointmentDbModel = new UserAppointment_1.default(userId, (0, uuid_1.v4)(), appointment.weekViewId, appointment.startDate, appointment.endDate, appointment.location);

@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { CreateAppointmentForm } from "../models/forms/CreateAppointmentForm";
 import AppointmentService from "../services/AppointmentService";
 import { AppointmentData } from "../models/share/AppointmentData";
 
@@ -11,8 +10,8 @@ class UserAppointmentController {
   }
 
   public async createAppointments(req: Request, res: Response): Promise<void> {
-    const createAppointmentForm = req.body as CreateAppointmentForm;
-    await this.appointmentService.createAppointments(createAppointmentForm);
+    const appointsData = req.body as AppointmentData[];
+    await this.appointmentService.createAppointments(appointsData);
     res.json({ data: true });
   }
 
@@ -26,7 +25,7 @@ class UserAppointmentController {
     req: Request,
     res: Response
   ): Promise<void> {
-    const { weekViewId } = req.params;
+    const weekViewId = req.params.id;
 
     const appointments =
       await this.appointmentService.getAllAppointmentsByWeekViewId(weekViewId);
