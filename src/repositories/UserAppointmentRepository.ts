@@ -72,7 +72,7 @@ class UserAppointmentRepository implements IUserAppointmentRepository {
     }
   }
 
-  async findByWeekViewId(id: string): Promise<UserAppointmentDbModel[] | null> {
+  async findByWeekViewId(id: string): Promise<UserAppointmentDbModel[]> {
     const db = await openDatabase();
 
     const results = await db.all(
@@ -81,7 +81,7 @@ class UserAppointmentRepository implements IUserAppointmentRepository {
     );
 
     if (!results || results.length === 0) {
-      return null;
+      return [];
     }
 
     return results.map(

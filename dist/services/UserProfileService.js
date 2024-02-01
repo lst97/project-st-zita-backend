@@ -8,23 +8,31 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-class UserController {
-    constructor(userService) {
-        this.userService = userService;
+const UserProfile_1 = __importDefault(require("../models/database/UserProfile"));
+class UserProfileService {
+    constructor(userProfileRepository) {
+        this.userProfileRepository = userProfileRepository;
     }
-    createUser(req, res) {
+    createProfile(user, userForm) {
         return __awaiter(this, void 0, void 0, function* () {
-            const createUserForm = req.body;
-            const user = yield this.userService.createUser(createUserForm);
-            res.json({ data: user });
+            let userProfile = new UserProfile_1.default(user.id, userForm.email, userForm.color, userForm.phoneNumber, userForm.image);
+            yield this.userProfileRepository.create(userProfile);
+            return user;
         });
     }
-    getAllUserData(req, res) {
+    getProfile(userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const users = yield this.userService.getAllUserData();
-            res.json({ data: users });
+            return yield this.userProfileRepository.findById(userId);
+        });
+    }
+    getAllProfiles() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.userProfileRepository.findAll();
         });
     }
 }
-exports.default = UserController;
+exports.default = UserProfileService;

@@ -13,13 +13,46 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const User_1 = __importDefault(require("../models/database/User"));
-// Import UserRepository if needed
+const UserData_1 = __importDefault(require("../models/share/UserData"));
 class UserService {
-    createUser(username) {
+    constructor(userProfileService, userRepository) {
+        this.userProfileService = userProfileService;
+        this.userRepository = userRepository;
+    }
+    createUser(userForm) {
         return __awaiter(this, void 0, void 0, function* () {
-            // Logic to create a user
-            const user = new User_1.default(username); // ID is just an example
+            const user = new User_1.default(userForm.username);
+            this.userRepository.create(user);
+            yield this.userProfileService.createProfile(user, userForm);
+            // create user profile
             return user;
+        });
+    }
+    getUserIdByUsername(username) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const user = yield this.userRepository.findByUsername(username);
+            const userId = user ? user.id : null;
+            return userId;
+        });
+    }
+    getAllUserData() {
+        return __awaiter(this, void 0, void 0, function* () {
+            let users = yield this.userRepository.findAll();
+            let userProfiles = yield this.userProfileService.getAllProfiles();
+            let userDataList = new Array();
+            users.map((user) => {
+                let profile = userProfiles.find((p) => p.id === user.id);
+                if (profile) {
+                    let userData = new UserData_1.default(user.username, profile.email, profile.color, profile.image, profile.phoneNumber);
+                    userDataList.push(userData);
+                }
+            });
+            return userDataList;
+        });
+    }
+    getAllUsers() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.userRepository.findAll();
         });
     }
 }

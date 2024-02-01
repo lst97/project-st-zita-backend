@@ -21,8 +21,12 @@ const userAppointmentController = new UserAppointmentController(
   appointmentService
 );
 
-router.post("/appointment", (req, res) =>
+router.post("/appointments", (req, res) =>
   userAppointmentController.createAppointments(req, res)
+);
+
+router.get("/appointments/week_view/:id", (req, res) =>
+  userAppointmentController.getAllAppointmentsByWeekViewId(req, res)
 );
 
 export default router;

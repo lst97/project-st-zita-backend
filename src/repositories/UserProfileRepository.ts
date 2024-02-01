@@ -67,7 +67,7 @@ class UserProfileRepository implements IUserProfileRepository {
     return rows.map(
       (row) =>
         new UserProfile(
-          row.id,
+          row.userId,
           row.email,
           row.color,
           row.phoneNumber,

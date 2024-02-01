@@ -9,22 +9,30 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-class UserController {
-    constructor(userService) {
-        this.userService = userService;
+class UserAppointmentController {
+    constructor(appointmentService) {
+        this.appointmentService = appointmentService;
     }
-    createUser(req, res) {
+    createAppointments(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            const createUserForm = req.body;
-            const user = yield this.userService.createUser(createUserForm);
-            res.json({ data: user });
+            const createAppointmentForm = req.body;
+            yield this.appointmentService.createAppointments(createAppointmentForm);
+            res.json({ data: true });
         });
     }
-    getAllUserData(req, res) {
+    getAllAppointments(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            const users = yield this.userService.getAllUserData();
-            res.json({ data: users });
+            const appointments = yield this.appointmentService.getAllAppointments();
+            res.json({ data: appointments });
+        });
+    }
+    // week_number + year = 142024
+    getAllAppointmentsByWeekViewId(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { weekViewId } = req.params;
+            const appointments = yield this.appointmentService.getAllAppointmentsByWeekViewId(weekViewId);
+            res.json({ data: appointments });
         });
     }
 }
-exports.default = UserController;
+exports.default = UserAppointmentController;

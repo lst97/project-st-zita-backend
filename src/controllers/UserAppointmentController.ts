@@ -13,27 +13,24 @@ class UserAppointmentController {
   public async createAppointments(req: Request, res: Response): Promise<void> {
     const createAppointmentForm = req.body as CreateAppointmentForm;
     await this.appointmentService.createAppointments(createAppointmentForm);
-    res.json(true);
+    res.json({ data: true });
   }
 
-  public async getAllAppointments(
-    req: Request,
-    res: Response
-  ): Promise<AppointmentData[]> {
+  public async getAllAppointments(req: Request, res: Response): Promise<void> {
     const appointments = await this.appointmentService.getAllAppointments();
-    res.json(appointments);
+    res.json({ data: appointments });
   }
 
   // week_number + year = 142024
   public async getAllAppointmentsByWeekViewId(
     req: Request,
     res: Response
-  ): Promise<AppointmentData[]> {
+  ): Promise<void> {
     const { weekViewId } = req.params;
 
     const appointments =
       await this.appointmentService.getAllAppointmentsByWeekViewId(weekViewId);
-    res.json(appointments);
+    res.json({ data: appointments });
   }
 }
 

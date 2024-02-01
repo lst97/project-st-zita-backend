@@ -13,12 +13,12 @@ class UserController {
     const createUserForm = req.body as CreateUserForm;
 
     const user = await this.userService.createUser(createUserForm);
-    res.json(user);
+    res.json({ data: user });
   }
 
   public async getAllUserData(req: Request, res: Response): Promise<void> {
     const users = await this.userService.getAllUserData();
-    res.json(users);
+    res.json({ data: users });
   }
 }
 
