@@ -147,5 +147,15 @@ class UserAppointmentRepository implements IUserAppointmentRepository {
       [groupId]
     );
   }
+
+  async deleteByWeekViewId(weekViewId: string): Promise<void> {
+    const db = await openDatabase();
+    await db.run(
+      `
+            DELETE FROM UserAppointments WHERE weekViewId = ?
+          `,
+      [weekViewId]
+    );
+  }
 }
 export default UserAppointmentRepository;

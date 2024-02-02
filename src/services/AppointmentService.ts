@@ -114,6 +114,10 @@ class AppointmentService {
       userNameMap
     );
   }
+
+  public async deleteAllAppointmentsByWeekViewId(weekViewId: string) {
+    await this.appointmentRepository.deleteByWeekViewId(weekViewId);
+  }
 }
 
 export default AppointmentService;

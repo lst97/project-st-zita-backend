@@ -79,5 +79,10 @@ class AppointmentService {
             return this.mapAppointmentDbModelsToAppointmentsData(appointmentDbModels, userNameMap);
         });
     }
+    deleteAllAppointmentsByWeekViewId(weekViewId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.appointmentRepository.deleteByWeekViewId(weekViewId);
+        });
+    }
 }
 exports.default = AppointmentService;

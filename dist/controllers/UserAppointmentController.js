@@ -34,5 +34,12 @@ class UserAppointmentController {
             res.json({ data: appointments });
         });
     }
+    deleteAllAppointmentsByWeekViewId(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const weekViewId = req.params.id;
+            yield this.appointmentService.deleteAllAppointmentsByWeekViewId(weekViewId);
+            res.json({ data: true });
+        });
+    }
 }
 exports.default = UserAppointmentController;

@@ -31,6 +31,12 @@ class UserAppointmentController {
       await this.appointmentService.getAllAppointmentsByWeekViewId(weekViewId);
     res.json({ data: appointments });
   }
+
+  public async deleteAllAppointmentsByWeekViewId(req: Request, res: Response) {
+    const weekViewId = req.params.id;
+    await this.appointmentService.deleteAllAppointmentsByWeekViewId(weekViewId);
+    res.json({ data: true });
+  }
 }
 
 export default UserAppointmentController;
