@@ -19,11 +19,12 @@ class UserProfileRepository {
     create(userProfile) {
         return __awaiter(this, void 0, void 0, function* () {
             const db = yield (0, database_1.openDatabase)();
-            yield db.run("INSERT INTO UserProfiles (id, email, color, phoneNumber, createDate, modifyDate) VALUES (?, ?, ?, ?, ?, ?)", [
+            yield db.run("INSERT INTO UserProfiles (userId, email, phoneNumber, image, color, createDate, modifyDate) VALUES (?, ?, ?, ?, ?, ?, ?)", [
                 userProfile.id,
                 userProfile.email,
-                userProfile.color,
                 userProfile.phoneNumber,
+                userProfile.image,
+                userProfile.color,
                 userProfile.createDate.toISOString(),
                 userProfile.modifyDate.toISOString(),
             ]);
@@ -33,7 +34,9 @@ class UserProfileRepository {
     findById(id) {
         return __awaiter(this, void 0, void 0, function* () {
             const db = yield (0, database_1.openDatabase)();
-            const row = yield db.get("SELECT * FROM UserProfiles WHERE id = ?", [id]);
+            const row = yield db.get("SELECT * FROM UserProfiles WHERE userId = ?", [
+                id,
+            ]);
             if (row) {
                 return new UserProfile_1.default(row.id, row.email, row.color, row.phoneNumber, row.image, new Date(row.createDate), new Date(row.modifyDate));
             }
@@ -45,7 +48,7 @@ class UserProfileRepository {
     update(userProfile) {
         return __awaiter(this, void 0, void 0, function* () {
             const db = yield (0, database_1.openDatabase)();
-            yield db.run("UPDATE UserProfiles SET email = ?, color = ?, phoneNumber = ?, image = ?, modifyDate = ? WHERE id = ?", [
+            yield db.run("UPDATE UserProfiles SET email = ?, color = ?, phoneNumber = ?, image = ?, modifyDate = ? WHERE userId = ?", [
                 userProfile.email,
                 userProfile.color,
                 userProfile.phoneNumber,
@@ -59,7 +62,7 @@ class UserProfileRepository {
     delete(id) {
         return __awaiter(this, void 0, void 0, function* () {
             const db = yield (0, database_1.openDatabase)();
-            yield db.run("DELETE FROM UserProfiles WHERE id = ?", [id]);
+            yield db.run("DELETE FROM UserProfiles WHERE userId = ?", [id]);
         });
     }
     findAll() {

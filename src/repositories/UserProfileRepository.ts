@@ -8,12 +8,13 @@ class UserProfileRepository implements IUserProfileRepository {
   async create(userProfile: UserProfile): Promise<UserProfile> {
     const db = await openDatabase();
     await db.run(
-      "INSERT INTO UserProfiles (id, email, color, phoneNumber, createDate, modifyDate) VALUES (?, ?, ?, ?, ?, ?)",
+      "INSERT INTO UserProfiles (userId, email, phoneNumber, image, color, createDate, modifyDate) VALUES (?, ?, ?, ?, ?, ?, ?)",
       [
         userProfile.id,
         userProfile.email,
-        userProfile.color,
         userProfile.phoneNumber,
+        userProfile.image,
+        userProfile.color,
         userProfile.createDate.toISOString(),
         userProfile.modifyDate.toISOString(),
       ]
@@ -23,7 +24,9 @@ class UserProfileRepository implements IUserProfileRepository {
 
   async findById(id: string): Promise<UserProfile | null> {
     const db = await openDatabase();
-    const row = await db.get("SELECT * FROM UserProfiles WHERE id = ?", [id]);
+    const row = await db.get("SELECT * FROM UserProfiles WHERE userId = ?", [
+      id,
+    ]);
     if (row) {
       return new UserProfile(
         row.id,
@@ -42,7 +45,7 @@ class UserProfileRepository implements IUserProfileRepository {
   async update(userProfile: UserProfile): Promise<UserProfile> {
     const db = await openDatabase();
     await db.run(
-      "UPDATE UserProfiles SET email = ?, color = ?, phoneNumber = ?, image = ?, modifyDate = ? WHERE id = ?",
+      "UPDATE UserProfiles SET email = ?, color = ?, phoneNumber = ?, image = ?, modifyDate = ? WHERE userId = ?",
       [
         userProfile.email,
         userProfile.color,
@@ -57,7 +60,7 @@ class UserProfileRepository implements IUserProfileRepository {
 
   async delete(id: string): Promise<void> {
     const db = await openDatabase();
-    await db.run("DELETE FROM UserProfiles WHERE id = ?", [id]);
+    await db.run("DELETE FROM UserProfiles WHERE userId = ?", [id]);
   }
 
   async findAll(): Promise<UserProfile[]> {
