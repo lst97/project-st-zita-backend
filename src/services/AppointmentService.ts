@@ -115,8 +115,19 @@ class AppointmentService {
     );
   }
 
-  public async deleteAllAppointmentsByWeekViewId(weekViewId: string) {
-    await this.appointmentRepository.deleteByWeekViewId(weekViewId);
+  public async deleteAllAppointmentsByWeekViewIdAndStaffName(
+    staffName: string,
+    weekViewId: string
+  ) {
+    const userId = await this.userService.getUserIdByUsername(staffName);
+    if (!userId) {
+      return;
+    }
+
+    await this.appointmentRepository.deleteByWeekViewIdAndUserId(
+      userId,
+      weekViewId
+    );
   }
 }
 

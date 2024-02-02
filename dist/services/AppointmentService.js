@@ -79,9 +79,13 @@ class AppointmentService {
             return this.mapAppointmentDbModelsToAppointmentsData(appointmentDbModels, userNameMap);
         });
     }
-    deleteAllAppointmentsByWeekViewId(weekViewId) {
+    deleteAllAppointmentsByWeekViewIdAndStaffName(staffName, weekViewId) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.appointmentRepository.deleteByWeekViewId(weekViewId);
+            const userId = yield this.userService.getUserIdByUsername(staffName);
+            if (!userId) {
+                return;
+            }
+            yield this.appointmentRepository.deleteByWeekViewIdAndUserId(userId, weekViewId);
         });
     }
 }

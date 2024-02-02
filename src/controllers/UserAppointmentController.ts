@@ -32,9 +32,16 @@ class UserAppointmentController {
     res.json({ data: appointments });
   }
 
-  public async deleteAllAppointmentsByWeekViewId(req: Request, res: Response) {
+  public async deleteAllAppointmentsByWeekViewIdAndStaffName(
+    req: Request,
+    res: Response
+  ) {
     const weekViewId = req.params.id;
-    await this.appointmentService.deleteAllAppointmentsByWeekViewId(weekViewId);
+    const staffName = req.query.staffName as string;
+    await this.appointmentService.deleteAllAppointmentsByWeekViewIdAndStaffName(
+      staffName,
+      weekViewId
+    );
     res.json({ data: true });
   }
 }

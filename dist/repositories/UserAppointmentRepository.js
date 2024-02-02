@@ -104,12 +104,12 @@ class UserAppointmentRepository {
           `, [groupId]);
         });
     }
-    deleteByWeekViewId(weekViewId) {
+    deleteByWeekViewIdAndUserId(userId, weekViewId) {
         return __awaiter(this, void 0, void 0, function* () {
             const db = yield (0, database_1.openDatabase)();
             yield db.run(`
-            DELETE FROM UserAppointments WHERE weekViewId = ?
-          `, [weekViewId]);
+            DELETE FROM UserAppointments WHERE weekViewId = ? AND userId = ?
+          `, [weekViewId, userId]);
         });
     }
 }

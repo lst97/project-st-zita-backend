@@ -30,7 +30,10 @@ router.get("/appointments/week_view/:id", (req, res) =>
 );
 
 router.delete("/appointments/week_view/:id", (req, res) =>
-  userAppointmentController.deleteAllAppointmentsByWeekViewId(req, res)
+  userAppointmentController.deleteAllAppointmentsByWeekViewIdAndStaffName(
+    req,
+    res
+  )
 );
 
 export default router;

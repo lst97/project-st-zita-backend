@@ -16,5 +16,5 @@ const appointmentService = new AppointmentService_1.default(new UserService_1.de
 const userAppointmentController = new UserAppointmentController_1.default(appointmentService);
 router.post("/appointments", (req, res) => userAppointmentController.createAppointments(req, res));
 router.get("/appointments/week_view/:id", (req, res) => userAppointmentController.getAllAppointmentsByWeekViewId(req, res));
-router.delete("/appointments/week_view/:id", (req, res) => userAppointmentController.deleteAllAppointmentsByWeekViewId(req, res));
+router.delete("/appointments/week_view/:id", (req, res) => userAppointmentController.deleteAllAppointmentsByWeekViewIdAndStaffName(req, res));
 exports.default = router;

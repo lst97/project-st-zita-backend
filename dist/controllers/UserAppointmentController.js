@@ -34,10 +34,11 @@ class UserAppointmentController {
             res.json({ data: appointments });
         });
     }
-    deleteAllAppointmentsByWeekViewId(req, res) {
+    deleteAllAppointmentsByWeekViewIdAndStaffName(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             const weekViewId = req.params.id;
-            yield this.appointmentService.deleteAllAppointmentsByWeekViewId(weekViewId);
+            const staffName = req.query.staffName;
+            yield this.appointmentService.deleteAllAppointmentsByWeekViewIdAndStaffName(staffName, weekViewId);
             res.json({ data: true });
         });
     }
