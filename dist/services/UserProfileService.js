@@ -24,6 +24,11 @@ class UserProfileService {
             return user;
         });
     }
+    deleteProfile(userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.userProfileRepository.delete(userId);
+        });
+    }
     getProfile(userId) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield this.userProfileRepository.findById(userId);

@@ -59,6 +59,15 @@ class UserAppointmentRepository {
             }
         });
     }
+    getAllWeekViewIdsByUserId(userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const db = yield (0, database_1.openDatabase)();
+            const results = yield db.all(`
+            SELECT weekViewId FROM UserAppointments WHERE userId = ?
+          `, [userId]);
+            return results.map((result) => result.weekViewId);
+        });
+    }
     findByWeekViewId(id) {
         return __awaiter(this, void 0, void 0, function* () {
             const db = yield (0, database_1.openDatabase)();

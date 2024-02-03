@@ -88,5 +88,17 @@ class AppointmentService {
             yield this.appointmentRepository.deleteByWeekViewIdAndUserId(userId, weekViewId);
         });
     }
+    deleteAllAppointmentsByUserName(staffName) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const userId = yield this.userService.getUserIdByUsername(staffName);
+            if (!userId) {
+                return;
+            }
+            const weekViewIds = yield this.appointmentRepository.getAllWeekViewIdsByUserId(userId);
+            for (const weekViewId of weekViewIds) {
+                yield this.appointmentRepository.deleteByWeekViewIdAndUserId(userId, weekViewId);
+            }
+        });
+    }
 }
 exports.default = AppointmentService;

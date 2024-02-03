@@ -129,6 +129,25 @@ class AppointmentService {
       weekViewId
     );
   }
+
+  public async deleteAllAppointmentsByUserName(
+    staffName: string
+  ): Promise<void> {
+    const userId = await this.userService.getUserIdByUsername(staffName);
+    if (!userId) {
+      return;
+    }
+
+    const weekViewIds =
+      await this.appointmentRepository.getAllWeekViewIdsByUserId(userId);
+
+    for (const weekViewId of weekViewIds) {
+      await this.appointmentRepository.deleteByWeekViewIdAndUserId(
+        userId,
+        weekViewId
+      );
+    }
+  }
 }
 
 export default AppointmentService;

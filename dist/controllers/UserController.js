@@ -10,14 +10,23 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 class UserController {
-    constructor(userService) {
+    constructor(userService, appointmentService) {
         this.userService = userService;
+        this.appointmentService = appointmentService;
     }
     createUser(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             const createUserForm = req.body;
             const user = yield this.userService.createUser(createUserForm);
             res.json({ data: user });
+        });
+    }
+    deleteUser(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const staffName = req.query.staffName;
+            yield this.appointmentService.deleteAllAppointmentsByUserName(staffName);
+            yield this.userService.deleteUser(staffName);
+            res.json({ data: true });
         });
     }
     getAllUserData(req, res) {

@@ -25,6 +25,9 @@ class UserProfileService {
     await this.userProfileRepository.create(userProfile);
     return user;
   }
+  public async deleteProfile(userId: string): Promise<void> {
+    await this.userProfileRepository.delete(userId);
+  }
 
   public async getProfile(userId: string): Promise<UserProfile | null> {
     return await this.userProfileRepository.findById(userId);

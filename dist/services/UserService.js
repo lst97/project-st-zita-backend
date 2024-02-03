@@ -28,6 +28,15 @@ class UserService {
             return user;
         });
     }
+    deleteUser(username) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const userId = yield this.getUserIdByUsername(username);
+            if (userId) {
+                yield this.userProfileService.deleteProfile(userId);
+                yield this.userRepository.delete(userId);
+            }
+        });
+    }
     getUserIdByUsername(username) {
         return __awaiter(this, void 0, void 0, function* () {
             const user = yield this.userRepository.findByUsername(username);
@@ -39,7 +48,7 @@ class UserService {
         return __awaiter(this, void 0, void 0, function* () {
             let users = yield this.userRepository.findAll();
             let userProfiles = yield this.userProfileService.getAllProfiles();
-            let userDataList = new Array();
+            let userDataList = [];
             users.map((user) => {
                 let profile = userProfiles.find((p) => p.id === user.id);
                 if (profile) {

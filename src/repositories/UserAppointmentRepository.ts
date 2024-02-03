@@ -72,6 +72,17 @@ class UserAppointmentRepository implements IUserAppointmentRepository {
     }
   }
 
+  async getAllWeekViewIdsByUserId(userId: string): Promise<string[]> {
+    const db = await openDatabase();
+    const results = await db.all(
+      `
+            SELECT weekViewId FROM UserAppointments WHERE userId = ?
+          `,
+      [userId]
+    );
+    return results.map((result) => result.weekViewId);
+  }
+
   async findByWeekViewId(id: string): Promise<UserAppointmentDbModel[]> {
     const db = await openDatabase();
 

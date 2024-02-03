@@ -3,6 +3,7 @@ import User from "../models/database/User";
 import UserProfileService from "./UserProfileService";
 import UserRepository from "../repositories/UserRepository";
 import UserData from "../models/share/UserData";
+import AppointmentService from "./AppointmentService";
 
 class UserService {
   private userProfileService: UserProfileService;
@@ -24,6 +25,14 @@ class UserService {
     return user;
   }
 
+  public async deleteUser(username: string): Promise<void> {
+    const userId = await this.getUserIdByUsername(username);
+    if (userId) {
+      await this.userProfileService.deleteProfile(userId);
+      await this.userRepository.delete(userId);
+    }
+  }
+
   public async getUserIdByUsername(username: string): Promise<string | null> {
     const user = await this.userRepository.findByUsername(username);
     const userId = user ? user.id : null;
@@ -33,7 +42,7 @@ class UserService {
   public async getAllUserData(): Promise<UserData[]> {
     let users = await this.userRepository.findAll();
     let userProfiles = await this.userProfileService.getAllProfiles();
-    let userDataList = new Array<UserData>();
+    let userDataList: UserData[] = [];
 
     users.map((user) => {
       let profile = userProfiles.find((p) => p.id === user.id);
