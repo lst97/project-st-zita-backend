@@ -42,7 +42,7 @@ class StaffService {
   }
 
   public async getIdByName(name: string): Promise<string> {
-    const staff = await this.staffRepository.findById(name);
+    const staff = await this.staffRepository.findByName(name);
     return staff ? staff.id : "";
   }
 }
