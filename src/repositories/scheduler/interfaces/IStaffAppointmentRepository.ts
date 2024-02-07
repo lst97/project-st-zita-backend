@@ -1,6 +1,6 @@
 // IUserRepository.ts
 
-import UserAppointmentDbModel from "../../models/database/UserAppointment";
+import UserAppointmentDbModel from "../../../models/database/StaffAppointment";
 
 interface IUserAppointmentRepository {
   create(

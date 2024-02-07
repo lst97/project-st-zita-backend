@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import AppointmentService from "../services/AppointmentService";
-import { AppointmentData } from "../models/share/AppointmentData";
+import AppointmentService from "../../services/AppointmentService";
+import { AppointmentData } from "../../models/share/scheduler/StaffAppointmentData";
 
-class UserAppointmentController {
+class StaffAppointmentController {
   private appointmentService: AppointmentService;
 
   constructor(appointmentService: AppointmentService) {
@@ -46,4 +46,4 @@ class UserAppointmentController {
   }
 }
 
-export default UserAppointmentController;
+export default StaffAppointmentController;

@@ -1,43 +1,44 @@
-import UserService from "./UserService";
-import UserAppointmentDbModel from "../models/database/UserAppointment";
+import StaffService from "./StaffService";
+import StaffAppointmentDbModel from "../models/database/StaffAppointment";
 import { v4 as uuidv4 } from "uuid";
-import UserAppointmentRepository from "../repositories/UserAppointmentRepository";
-import { AppointmentData } from "../models/share/AppointmentData";
+import StaffAppointmentRepository from "../repositories/scheduler/StaffAppointmentRepository";
+import { AppointmentData } from "../models/share/scheduler/StaffAppointmentData";
 
-class AppointmentService {
-  private userService: UserService;
-  private appointmentRepository: UserAppointmentRepository;
+class StaffAppointmentService {
+  private staffService: StaffService;
+  private appointmentRepository: StaffAppointmentRepository;
 
   constructor(
-    userService: UserService,
-    appointmentRepository: UserAppointmentRepository
+    staffService: StaffService,
+    appointmentRepository: StaffAppointmentRepository
   ) {
-    this.userService = userService;
+    this.staffService = staffService;
     this.appointmentRepository = appointmentRepository;
   }
 
   public async createAppointments(
     appointmentsData: AppointmentData[]
   ): Promise<boolean> {
-    const users = await this.userService.getAllUsers();
-    const userIdMap = new Map<string, string>();
-    users.forEach((user) => {
-      userIdMap.set(user.username, user.id);
+    // Can optimize this by using groupBy
+    const staffs = await this.staffService.getAll();
+    const staffIdMap = new Map<string, string>();
+    staffs.forEach((staff) => {
+      staffIdMap.set(staff.name, staff.id);
     });
 
-    const appointmentsDbModels = new Array<UserAppointmentDbModel>();
+    const appointmentsDbModels = new Array<StaffAppointmentDbModel>();
     appointmentsData.forEach((appointment) => {
-      const userId = userIdMap.get(appointment.username);
+      const staffId = staffIdMap.get(appointment.staffName);
 
-      if (userId) {
-        const appointmentDbModel = new UserAppointmentDbModel(
-          userId,
-          uuidv4(),
-          appointment.weekViewId,
-          appointment.startDate,
-          appointment.endDate,
-          appointment.location
-        );
+      if (staffId) {
+        const appointmentDbModel = new StaffAppointmentDbModel({
+          id: uuidv4(),
+          staffId: staffId,
+          weekViewId: appointment.weekViewId,
+          startDate: appointment.startDate,
+          endDate: appointment.endDate,
+          location: appointment.location,
+        });
 
         appointmentsDbModels.push(appointmentDbModel);
       }
@@ -48,38 +49,39 @@ class AppointmentService {
   }
 
   private convertToAppointmentData(
-    appointmentDbModel: UserAppointmentDbModel,
-    userName: string
+    appointmentDbModel: StaffAppointmentDbModel,
+    staffName: string
   ): AppointmentData {
-    return new AppointmentData(
-      userName,
-      appointmentDbModel.groupId,
-      appointmentDbModel.weekViewId,
-      appointmentDbModel.startDate,
-      appointmentDbModel.endDate,
-      appointmentDbModel.location
-    );
-  }
-  private async buildUserNameMap(): Promise<Map<string, string>> {
-    const users = await this.userService.getAllUsers();
-    const userNameMap = new Map<string, string>();
-    users.forEach((user) => {
-      userNameMap.set(user.id, user.username);
+    return new AppointmentData({
+      staffName: staffName,
+      groupId: appointmentDbModel.id,
+      weekViewId: appointmentDbModel.weekViewId,
+      location: appointmentDbModel.location,
+      startDate: appointmentDbModel.startDate,
+      endDate: appointmentDbModel.endDate,
     });
-    return userNameMap;
+  }
+
+  private async buildStaffNameMap(): Promise<Map<string, string>> {
+    const staffs = await this.staffService.getAll();
+    const staffNameMap = new Map<string, string>();
+    staffs.forEach((staff) => {
+      staffNameMap.set(staff.id, staff.name);
+    });
+    return staffNameMap;
   }
 
   private mapAppointmentDbModelsToAppointmentsData(
-    appointmentDbModels: UserAppointmentDbModel[],
-    userNameMap: Map<string, string>
+    appointmentDbModels: StaffAppointmentDbModel[],
+    staffNameMap: Map<string, string>
   ): AppointmentData[] {
     const appointments = new Array<AppointmentData>();
 
     for (const appointmentDbModel of appointmentDbModels) {
-      const userName = userNameMap.get(appointmentDbModel.userId);
-      if (userName) {
+      const staffName = staffNameMap.get(appointmentDbModel.staffId);
+      if (staffName) {
         appointments.push(
-          this.convertToAppointmentData(appointmentDbModel, userName)
+          this.convertToAppointmentData(appointmentDbModel, staffName)
         );
       }
     }
@@ -89,11 +91,11 @@ class AppointmentService {
 
   public async getAllAppointments(): Promise<AppointmentData[]> {
     const appointmentDbModels = await this.appointmentRepository.findAll();
-    const userNameMap = await this.buildUserNameMap();
+    const staffNameMap = await this.buildStaffNameMap();
 
     return this.mapAppointmentDbModelsToAppointmentsData(
       appointmentDbModels,
-      userNameMap
+      staffNameMap
     );
   }
 
@@ -103,7 +105,7 @@ class AppointmentService {
     const appointmentDbModels =
       await this.appointmentRepository.findByWeekViewId(weekViewId);
 
-    const userNameMap = await this.buildUserNameMap();
+    const staffNameMap = await this.buildStaffNameMap();
 
     if (!appointmentDbModels) {
       return null;
@@ -111,7 +113,7 @@ class AppointmentService {
 
     return this.mapAppointmentDbModelsToAppointmentsData(
       appointmentDbModels,
-      userNameMap
+      staffNameMap
     );
   }
 
@@ -119,35 +121,35 @@ class AppointmentService {
     staffName: string,
     weekViewId: string
   ) {
-    const userId = await this.userService.getUserIdByUsername(staffName);
-    if (!userId) {
+    const staffId = await this.staffService.getIdByName(staffName);
+    if (!staffId) {
       return;
     }
 
-    await this.appointmentRepository.deleteByWeekViewIdAndUserId(
-      userId,
+    await this.appointmentRepository.deleteByWeekViewIdAndStaffId(
+      staffId,
       weekViewId
     );
   }
 
-  public async deleteAllAppointmentsByUserName(
+  public async deleteAllAppointmentsByStaffName(
     staffName: string
   ): Promise<void> {
-    const userId = await this.userService.getUserIdByUsername(staffName);
-    if (!userId) {
+    const staffId = await this.staffService.getIdByName(staffName);
+    if (!staffId) {
       return;
     }
 
     const weekViewIds =
-      await this.appointmentRepository.getAllWeekViewIdsByUserId(userId);
+      await this.appointmentRepository.getAllWeekViewIdsByStaffId(staffId);
 
     for (const weekViewId of weekViewIds) {
-      await this.appointmentRepository.deleteByWeekViewIdAndUserId(
-        userId,
+      await this.appointmentRepository.deleteByWeekViewIdAndStaffId(
+        staffId,
         weekViewId
       );
     }
   }
 }
 
-export default AppointmentService;
+export default StaffAppointmentService;

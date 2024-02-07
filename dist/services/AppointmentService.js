@@ -12,26 +12,34 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const UserAppointment_1 = __importDefault(require("../models/database/UserAppointment"));
+const StaffAppointment_1 = __importDefault(require("../models/database/StaffAppointment"));
 const uuid_1 = require("uuid");
-const AppointmentData_1 = require("../models/share/AppointmentData");
-class AppointmentService {
-    constructor(userService, appointmentRepository) {
-        this.userService = userService;
+const StaffAppointmentData_1 = require("../models/share/scheduler/StaffAppointmentData");
+class StaffAppointmentService {
+    constructor(staffService, appointmentRepository) {
+        this.staffService = staffService;
         this.appointmentRepository = appointmentRepository;
     }
     createAppointments(appointmentsData) {
         return __awaiter(this, void 0, void 0, function* () {
-            const users = yield this.userService.getAllUsers();
-            const userIdMap = new Map();
-            users.forEach((user) => {
-                userIdMap.set(user.username, user.id);
+            // Can optimize this by using groupBy
+            const staffs = yield this.staffService.getAll();
+            const staffIdMap = new Map();
+            staffs.forEach((staff) => {
+                staffIdMap.set(staff.name, staff.id);
             });
             const appointmentsDbModels = new Array();
             appointmentsData.forEach((appointment) => {
-                const userId = userIdMap.get(appointment.username);
-                if (userId) {
-                    const appointmentDbModel = new UserAppointment_1.default(userId, (0, uuid_1.v4)(), appointment.weekViewId, appointment.startDate, appointment.endDate, appointment.location);
+                const staffId = staffIdMap.get(appointment.staffName);
+                if (staffId) {
+                    const appointmentDbModel = new StaffAppointment_1.default({
+                        id: (0, uuid_1.v4)(),
+                        staffId: staffId,
+                        weekViewId: appointment.weekViewId,
+                        startDate: appointment.startDate,
+                        endDate: appointment.endDate,
+                        location: appointment.location,
+                    });
                     appointmentsDbModels.push(appointmentDbModel);
                 }
             });
@@ -39,25 +47,32 @@ class AppointmentService {
             return true;
         });
     }
-    convertToAppointmentData(appointmentDbModel, userName) {
-        return new AppointmentData_1.AppointmentData(userName, appointmentDbModel.groupId, appointmentDbModel.weekViewId, appointmentDbModel.startDate, appointmentDbModel.endDate, appointmentDbModel.location);
-    }
-    buildUserNameMap() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const users = yield this.userService.getAllUsers();
-            const userNameMap = new Map();
-            users.forEach((user) => {
-                userNameMap.set(user.id, user.username);
-            });
-            return userNameMap;
+    convertToAppointmentData(appointmentDbModel, staffName) {
+        return new StaffAppointmentData_1.AppointmentData({
+            staffName: staffName,
+            groupId: appointmentDbModel.id,
+            weekViewId: appointmentDbModel.weekViewId,
+            location: appointmentDbModel.location,
+            startDate: appointmentDbModel.startDate,
+            endDate: appointmentDbModel.endDate,
         });
     }
-    mapAppointmentDbModelsToAppointmentsData(appointmentDbModels, userNameMap) {
+    buildStaffNameMap() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const staffs = yield this.staffService.getAll();
+            const staffNameMap = new Map();
+            staffs.forEach((staff) => {
+                staffNameMap.set(staff.id, staff.name);
+            });
+            return staffNameMap;
+        });
+    }
+    mapAppointmentDbModelsToAppointmentsData(appointmentDbModels, staffNameMap) {
         const appointments = new Array();
         for (const appointmentDbModel of appointmentDbModels) {
-            const userName = userNameMap.get(appointmentDbModel.userId);
-            if (userName) {
-                appointments.push(this.convertToAppointmentData(appointmentDbModel, userName));
+            const staffName = staffNameMap.get(appointmentDbModel.staffId);
+            if (staffName) {
+                appointments.push(this.convertToAppointmentData(appointmentDbModel, staffName));
             }
         }
         return appointments;
@@ -65,40 +80,40 @@ class AppointmentService {
     getAllAppointments() {
         return __awaiter(this, void 0, void 0, function* () {
             const appointmentDbModels = yield this.appointmentRepository.findAll();
-            const userNameMap = yield this.buildUserNameMap();
-            return this.mapAppointmentDbModelsToAppointmentsData(appointmentDbModels, userNameMap);
+            const staffNameMap = yield this.buildStaffNameMap();
+            return this.mapAppointmentDbModelsToAppointmentsData(appointmentDbModels, staffNameMap);
         });
     }
     getAllAppointmentsByWeekViewId(weekViewId) {
         return __awaiter(this, void 0, void 0, function* () {
             const appointmentDbModels = yield this.appointmentRepository.findByWeekViewId(weekViewId);
-            const userNameMap = yield this.buildUserNameMap();
+            const staffNameMap = yield this.buildStaffNameMap();
             if (!appointmentDbModels) {
                 return null;
             }
-            return this.mapAppointmentDbModelsToAppointmentsData(appointmentDbModels, userNameMap);
+            return this.mapAppointmentDbModelsToAppointmentsData(appointmentDbModels, staffNameMap);
         });
     }
     deleteAllAppointmentsByWeekViewIdAndStaffName(staffName, weekViewId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const userId = yield this.userService.getUserIdByUsername(staffName);
-            if (!userId) {
+            const staffId = yield this.staffService.getIdByName(staffName);
+            if (!staffId) {
                 return;
             }
-            yield this.appointmentRepository.deleteByWeekViewIdAndUserId(userId, weekViewId);
+            yield this.appointmentRepository.deleteByWeekViewIdAndStaffId(staffId, weekViewId);
         });
     }
-    deleteAllAppointmentsByUserName(staffName) {
+    deleteAllAppointmentsByStaffName(staffName) {
         return __awaiter(this, void 0, void 0, function* () {
-            const userId = yield this.userService.getUserIdByUsername(staffName);
-            if (!userId) {
+            const staffId = yield this.staffService.getIdByName(staffName);
+            if (!staffId) {
                 return;
             }
-            const weekViewIds = yield this.appointmentRepository.getAllWeekViewIdsByUserId(userId);
+            const weekViewIds = yield this.appointmentRepository.getAllWeekViewIdsByStaffId(staffId);
             for (const weekViewId of weekViewIds) {
-                yield this.appointmentRepository.deleteByWeekViewIdAndUserId(userId, weekViewId);
+                yield this.appointmentRepository.deleteByWeekViewIdAndStaffId(staffId, weekViewId);
             }
         });
     }
 }
-exports.default = AppointmentService;
+exports.default = StaffAppointmentService;

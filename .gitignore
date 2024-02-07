@@ -2,3 +2,6 @@
 /.env
 
 /dist
+dist/services/AppointmentService.js
+data.db
+dist/server.js
