@@ -3,6 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+require("reflect-metadata");
 const express_1 = __importDefault(require("express"));
 const helmet_1 = __importDefault(require("helmet"));
 const StaffRoutes_1 = __importDefault(require("./routes/StaffRoutes"));
@@ -19,5 +20,5 @@ app.listen(`${ServerConstants_1.PORT}`, () => {
     console.log(`Server running on port ${ServerConstants_1.PORT}`);
 });
 function csrf() {
-    throw new Error("Function not implemented.");
+    throw new Error('Function not implemented.');
 }

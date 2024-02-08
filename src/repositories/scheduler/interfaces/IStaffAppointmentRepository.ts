@@ -1,16 +1,14 @@
 // IUserRepository.ts
 
-import UserAppointmentDbModel from "../../../models/database/StaffAppointment";
+import StaffAppointmentDbModel from "../../../models/database/StaffAppointment";
 
-interface IUserAppointmentRepository {
-  create(
-    userOrUsers: UserAppointmentDbModel | UserAppointmentDbModel[]
-  ): Promise<boolean | UserAppointmentDbModel>;
-  findByGroupId(id: string): Promise<UserAppointmentDbModel | null>;
-  findByWeekViewId(id: string): Promise<UserAppointmentDbModel[] | null>;
-  findAll(): Promise<UserAppointmentDbModel[]>;
-  update(appointment: UserAppointmentDbModel): Promise<UserAppointmentDbModel>;
-  delete(id: string): Promise<void>;
+interface IStaffAppointmentRepository
+  extends IBaseRepository<StaffAppointmentDbModel> {
+  findByWeekViewId(id: string): Promise<StaffAppointmentDbModel[] | null>;
+
+  createMany(
+    appointments: StaffAppointmentDbModel[]
+  ): Promise<StaffAppointmentDbModel[]>;
 }
 
-export default IUserAppointmentRepository;
+export default IStaffAppointmentRepository;

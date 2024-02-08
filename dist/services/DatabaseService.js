@@ -15,39 +15,11 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __esDecorate = (this && this.__esDecorate) || function (ctor, descriptorIn, decorators, contextIn, initializers, extraInitializers) {
-    function accept(f) { if (f !== void 0 && typeof f !== "function") throw new TypeError("Function expected"); return f; }
-    var kind = contextIn.kind, key = kind === "getter" ? "get" : kind === "setter" ? "set" : "value";
-    var target = !descriptorIn && ctor ? contextIn["static"] ? ctor : ctor.prototype : null;
-    var descriptor = descriptorIn || (target ? Object.getOwnPropertyDescriptor(target, contextIn.name) : {});
-    var _, done = false;
-    for (var i = decorators.length - 1; i >= 0; i--) {
-        var context = {};
-        for (var p in contextIn) context[p] = p === "access" ? {} : contextIn[p];
-        for (var p in contextIn.access) context.access[p] = contextIn.access[p];
-        context.addInitializer = function (f) { if (done) throw new TypeError("Cannot add initializers after decoration has completed"); extraInitializers.push(accept(f || null)); };
-        var result = (0, decorators[i])(kind === "accessor" ? { get: descriptor.get, set: descriptor.set } : descriptor[key], context);
-        if (kind === "accessor") {
-            if (result === void 0) continue;
-            if (result === null || typeof result !== "object") throw new TypeError("Object expected");
-            if (_ = accept(result.get)) descriptor.get = _;
-            if (_ = accept(result.set)) descriptor.set = _;
-            if (_ = accept(result.init)) initializers.unshift(_);
-        }
-        else if (_ = accept(result)) {
-            if (kind === "field") initializers.unshift(_);
-            else descriptor[key] = _;
-        }
-    }
-    if (target) Object.defineProperty(target, contextIn.name, descriptor);
-    done = true;
-};
-var __runInitializers = (this && this.__runInitializers) || function (thisArg, initializers, value) {
-    var useValue = arguments.length > 2;
-    for (var i = 0; i < initializers.length; i++) {
-        value = useValue ? initializers[i].call(thisArg, value) : initializers[i].call(thisArg);
-    }
-    return useValue ? value : void 0;
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
@@ -56,72 +28,43 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var __setFunctionName = (this && this.__setFunctionName) || function (f, name, prefix) {
-    if (typeof name === "symbol") name = name.description ? "[".concat(name.description, "]") : "";
-    return Object.defineProperty(f, "name", { configurable: true, value: prefix ? "".concat(prefix, " ", name) : name });
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DatabaseService = void 0;
 const typedi_1 = require("typedi");
-const DatabaseUtils = __importStar(require("../utils/database"));
-let DatabaseService = (() => {
-    let _classDecorators = [(0, typedi_1.Service)()];
-    let _classDescriptor;
-    let _classExtraInitializers = [];
-    let _classThis;
-    var DatabaseService = _classThis = class {
-        constructor() {
-            this.db = null;
-        }
-        connect() {
-            return __awaiter(this, void 0, void 0, function* () {
-                this.db = yield DatabaseUtils.openDatabase();
-            });
-        }
-        close() {
-            return __awaiter(this, void 0, void 0, function* () {
-                if (this.db) {
-                    yield this.db.close();
-                    this.db = null;
-                }
-            });
-        }
-        // Example method to get data from the database
-        getData(query) {
-            return __awaiter(this, void 0, void 0, function* () {
-                if (!this.db) {
-                    throw new Error("Database not connected");
-                }
-                return this.db.all(query);
-            });
-        }
-        // Example method to execute a query like INSERT, UPDATE, DELETE
-        runQuery(query) {
-            return __awaiter(this, void 0, void 0, function* () {
-                if (!this.db) {
-                    throw new Error("Database not connected");
-                }
-                yield this.db.exec(query);
-            });
-        }
-    };
-    __setFunctionName(_classThis, "DatabaseService");
-    (() => {
-        const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
-        __esDecorate(null, _classDescriptor = { value: _classThis }, _classDecorators, { kind: "class", name: _classThis.name, metadata: _metadata }, null, _classExtraInitializers);
-        DatabaseService = _classThis = _classDescriptor.value;
-        if (_metadata) Object.defineProperty(_classThis, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
-        __runInitializers(_classThis, _classExtraInitializers);
-    })();
-    return DatabaseService = _classThis;
-})();
+const sqlite3_1 = __importDefault(require("sqlite3"));
+const DbConstants = __importStar(require("../constants/DatabaseConstants"));
+let DatabaseService = class DatabaseService {
+    constructor() {
+        this.db = new sqlite3_1.default.Database(DbConstants.CONNECTION_STRING, (err) => {
+            if (err) {
+                console.error('Error opening database', err);
+                throw err; // Consider handling this error more gracefully
+            }
+            console.log('Database connection established');
+        });
+        process.on('SIGINT', this.closeConnection.bind(this));
+    }
+    closeConnection() {
+        this.db.close((err) => {
+            if (err) {
+                console.error('Error closing the database connection', err);
+                return;
+            }
+            console.log('Database connection closed');
+        });
+    }
+    getDatabase() {
+        return this.db;
+    }
+};
 exports.DatabaseService = DatabaseService;
+exports.DatabaseService = DatabaseService = __decorate([
+    (0, typedi_1.Service)(),
+    __metadata("design:paramtypes", [])
+], DatabaseService);

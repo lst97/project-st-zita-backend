@@ -1,177 +1,224 @@
-import IStaffAppointmentRepository from "./interfaces/IStaffAppointmentRepository";
-import StaffAppointmentDbModel from "../../models/database/StaffAppointment";
-import { openDatabase } from "../../utils/database";
-import { ISqlite } from "sqlite";
-import { Statement } from "sqlite3";
+import IStaffAppointmentRepository from './interfaces/IStaffAppointmentRepository';
+import StaffAppointmentDbModel from '../../models/database/StaffAppointment';
+import { Service } from 'typedi';
+import { DatabaseService } from '../../services/DatabaseService';
 
+@Service()
 class StaffAppointmentRepository implements IStaffAppointmentRepository {
-  async findByGroupId(
-    groupId: string
-  ): Promise<StaffAppointmentDbModel | null> {
-    const db = await openDatabase();
-    const result = await db.get(
-      `
-            SELECT * FROM StaffAppointments WHERE groupId = ?
-          `,
-      [groupId]
-    );
+	constructor(private databaseService: DatabaseService) {}
+	async findById(id: string): Promise<StaffAppointmentDbModel | null> {
+		return new Promise((resolve, reject) => {
+			const db = this.databaseService.getDatabase();
+			db.get(
+				'SELECT * FROM StaffAppointments WHERE id = ?',
+				[id],
+				(err, row: StaffAppointmentDbModel | undefined) => {
+					if (err) {
+						reject(err);
+					} else if (row) {
+						resolve(row);
+					} else {
+						resolve(null);
+					}
+				}
+			);
+		});
+	}
 
-    if (!result) {
-      return null;
-    }
+	private async createAppointment(
+		appointment: StaffAppointmentDbModel
+	): Promise<boolean | Error> {
+		return new Promise((resolve, reject) => {
+			const db = this.databaseService.getDatabase();
+			db.run(
+				`
+          INSERT INTO StaffAppointments (id, staffId, weekViewId, startDate, endDate, location)
+          VALUES (?, ?, ?, ?, ?, ?)
+        `,
+				[
+					appointment.id,
+					appointment.staffId,
+					appointment.weekViewId,
+					appointment.startDate,
+					appointment.endDate,
+					appointment.location
+				],
+				(err) => {
+					if (err) {
+						reject(err);
+					} else {
+						resolve(true);
+					}
+				}
+			);
+		});
+	}
 
-    return new StaffAppointmentDbModel({
-      id: result.id,
-      staffId: result.staffId,
-      weekViewId: result.weekViewId,
-      startDate: result.startDate,
-      endDate: result.endDate,
-      location: result.location,
-    });
-  }
+	private async createManyAppointments(
+		appointments: StaffAppointmentDbModel[]
+	): Promise<boolean | Error> {
+		return new Promise((resolve, reject) => {
+			const db = this.databaseService.getDatabase();
+			const placeholders = appointments
+				.map(() => '(?, ?, ?, ?, ?, ?)')
+				.join(', ');
+			const values = appointments.flatMap((appointment) => [
+				appointment.id,
+				appointment.staffId,
+				appointment.weekViewId,
+				appointment.startDate,
+				appointment.endDate,
+				appointment.location
+			]);
 
-  private async createAppointment(
-    appointment: StaffAppointmentDbModel
-  ): Promise<ISqlite.RunResult<Statement>> {
-    const db = await openDatabase();
+			db.run(
+				`
+          INSERT INTO StaffAppointments (id, staffId, weekViewId, startDate, endDate, location)
+          VALUES ${placeholders}
+        `,
+				values,
+				(err) => {
+					if (err) {
+						reject(err);
+					} else {
+						resolve(true);
+					}
+				}
+			);
+		});
+	}
 
-    return db.run(
-      `
-            INSERT INTO StaffAppointments (id, staffId, weekViewId, startDate, endDate, location)
-            VALUES (?, ?, ?, ?, ?, ?)
-          `,
-      [
-        appointment.id,
-        appointment.staffId,
-        appointment.weekViewId,
-        appointment.startDate,
-        appointment.endDate,
-        appointment.location,
-      ]
-    );
-  }
-  // Overload signatures
-  async create(
-    appointment: StaffAppointmentDbModel
-  ): Promise<StaffAppointmentDbModel>;
-  async create(appointments: StaffAppointmentDbModel[]): Promise<boolean>;
+	async create(
+		appointment: StaffAppointmentDbModel
+	): Promise<StaffAppointmentDbModel> {
+		await this.createAppointment(appointment);
+		return appointment;
+	}
 
-  // Actual implementation
-  async create(
-    appointmentOrAppointments:
-      | StaffAppointmentDbModel
-      | StaffAppointmentDbModel[]
-  ): Promise<boolean | StaffAppointmentDbModel> {
-    if (Array.isArray(appointmentOrAppointments)) {
-      for (const appointment of appointmentOrAppointments) {
-        const result = await this.createAppointment(appointment);
-        // TODO: handle if any insertion fails
-      }
-      return true;
-    } else {
-      await this.createAppointment(appointmentOrAppointments);
-      return appointmentOrAppointments;
-    }
-  }
+	async createMany(
+		appointments: StaffAppointmentDbModel[]
+	): Promise<StaffAppointmentDbModel[]> {
+		await this.createManyAppointments(appointments);
+		return appointments;
+	}
 
-  async getAllWeekViewIdsByStaffId(staffId: string): Promise<string[]> {
-    const db = await openDatabase();
-    const results = await db.all(
-      `
-            SELECT weekViewId FROM StaffAppointments WHERE staffId = ?
-          `,
-      [staffId]
-    );
-    return results.map((result) => result.weekViewId);
-  }
+	async getAllWeekViewIdsByStaffId(staffId: string): Promise<string[]> {
+		return new Promise((resolve, reject) => {
+			const db = this.databaseService.getDatabase();
+			db.all(
+				`
+          SELECT weekViewId FROM StaffAppointments WHERE staffId = ?
+        `,
+				[staffId],
+				(err, rows: { weekViewId: string }[]) => {
+					if (err) {
+						reject(err);
+					} else {
+						resolve(rows.map((row) => row.weekViewId));
+					}
+				}
+			);
+		});
+	}
 
-  async findByWeekViewId(id: string): Promise<StaffAppointmentDbModel[]> {
-    const db = await openDatabase();
+	async findByWeekViewId(id: string): Promise<StaffAppointmentDbModel[]> {
+		return new Promise((resolve, reject) => {
+			const db = this.databaseService.getDatabase();
+			db.all(
+				'SELECT * FROM StaffAppointments WHERE weekViewId = ?',
+				[id],
+				(err, rows: StaffAppointmentDbModel[]) => {
+					if (err) {
+						reject(err);
+					} else {
+						resolve(rows);
+					}
+				}
+			);
+		});
+	}
 
-    const results = await db.all(
-      "SELECT * FROM StaffAppointments WHERE weekViewId = ?",
-      [id]
-    );
+	async findAll(): Promise<StaffAppointmentDbModel[]> {
+		return new Promise((resolve, reject) => {
+			const db = this.databaseService.getDatabase();
+			db.all(
+				'SELECT * FROM StaffAppointments',
+				(err, rows: StaffAppointmentDbModel[]) => {
+					if (err) {
+						reject(err);
+					} else {
+						resolve(rows);
+					}
+				}
+			);
+		});
+	}
 
-    if (!results || results.length === 0) {
-      return [];
-    }
-
-    return results.map(
-      (result) =>
-        new StaffAppointmentDbModel({
-          id: result.id,
-          staffId: result.staffId,
-          weekViewId: result.weekViewId,
-          startDate: result.startDate,
-          endDate: result.endDate,
-          location: result.location,
-        })
-    );
-  }
-
-  async findAll(): Promise<StaffAppointmentDbModel[]> {
-    const db = await openDatabase();
-    const results = await db.all(`
-            SELECT * FROM StaffAppointments
-          `);
-
-    return results.map(
-      (result) =>
-        new StaffAppointmentDbModel({
-          id: result.id,
-          staffId: result.staffId,
-          weekViewId: result.weekViewId,
-          startDate: result.startDate,
-          endDate: result.endDate,
-          location: result.location,
-        })
-    );
-  }
-  async update(
-    appointment: StaffAppointmentDbModel
-  ): Promise<StaffAppointmentDbModel> {
-    const db = await openDatabase();
-    await db.run(
-      `
+	async update(
+		appointment: StaffAppointmentDbModel
+	): Promise<StaffAppointmentDbModel> {
+		return new Promise((resolve, reject) => {
+			const db = this.databaseService.getDatabase();
+			db.run(
+				`
             UPDATE StaffAppointments SET staffId = ?, weekViewId = ?, startDate = ?, endDate = ?, location = ?, modifyDate = ?
             WHERE id = ?
           `,
-      [
-        appointment.staffId,
-        appointment.weekViewId,
-        appointment.startDate,
-        appointment.endDate,
-        appointment.location,
-        new Date().toISOString(),
-        appointment.id,
-      ]
-    );
+				[
+					appointment.staffId,
+					appointment.weekViewId,
+					appointment.startDate,
+					appointment.endDate,
+					appointment.location,
+					new Date().toISOString(),
+					appointment.id
+				],
+				(err) => {
+					if (err) {
+						reject(err);
+					} else {
+						resolve(appointment);
+					}
+				}
+			);
+		});
+	}
 
-    return appointment;
-  }
+	async deleteById(id: string): Promise<void> {
+		return new Promise((resolve, reject) => {
+			const db = this.databaseService.getDatabase();
+			db.run(
+				'DELETE FROM StaffAppointments WHERE id = ?',
+				[id],
+				(err) => {
+					if (err) {
+						reject(err);
+					} else {
+						resolve();
+					}
+				}
+			);
+		});
+	}
 
-  async delete(id: string): Promise<void> {
-    const db = await openDatabase();
-    await db.run(
-      `
-            DELETE FROM StaffAppointments WHERE id = ?
-          `,
-      [id]
-    );
-  }
-
-  async deleteByWeekViewIdAndStaffId(
-    staffId: string,
-    weekViewId: string
-  ): Promise<void> {
-    const db = await openDatabase();
-    await db.run(
-      `
-            DELETE FROM StaffAppointments WHERE weekViewId = ? AND staffId = ?
-          `,
-      [weekViewId, staffId]
-    );
-  }
+	async deleteByWeekViewIdAndStaffId(
+		staffId: string,
+		weekViewId: string
+	): Promise<void> {
+		return new Promise((resolve, reject) => {
+			const db = this.databaseService.getDatabase();
+			db.run(
+				'DELETE FROM StaffAppointments WHERE weekViewId = ? AND staffId = ?',
+				[weekViewId, staffId],
+				(err) => {
+					if (err) {
+						reject(err);
+					} else {
+						resolve();
+					}
+				}
+			);
+		});
+	}
 }
 export default StaffAppointmentRepository;

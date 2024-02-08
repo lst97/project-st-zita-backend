@@ -1,38 +1,36 @@
-import { Request, Response } from "express";
-import StaffService from "../../services/StaffService";
-import { CreateStaffForm } from "../../models/forms/scheduler/CreateStaffForm";
-import AppointmentService from "../../services/AppointmentService";
+import { Request, Response } from 'express';
+import StaffService from '../../services/scheduler/StaffService';
+import { CreateStaffForm } from '../../models/forms/scheduler/CreateStaffForm';
+import { StaffAppointmentService as AppointmentService } from '../../services/scheduler/StaffAppointmentService';
+import { Service } from 'typedi';
 
+@Service()
 class StaffController {
-  private appointmentService: AppointmentService;
-  private staffService: StaffService;
+	constructor(
+		private staffService: StaffService,
+		private appointmentService: AppointmentService
+	) {}
 
-  constructor(
-    staffService: StaffService,
-    appointmentService: AppointmentService
-  ) {
-    this.staffService = staffService;
-    this.appointmentService = appointmentService;
-  }
+	public async createStaff(req: Request, res: Response): Promise<void> {
+		const createStaffForm = req.body as CreateStaffForm;
 
-  public async createStaff(req: Request, res: Response): Promise<void> {
-    const createStaffForm = req.body as CreateStaffForm;
+		const staff = await this.staffService.create(createStaffForm);
+		res.json({ data: staff });
+	}
 
-    const staff = await this.staffService.create(createStaffForm);
-    res.json({ data: staff });
-  }
+	public async deleteStaff(req: Request, res: Response): Promise<void> {
+		const staffName = req.query.staffName as string;
+		await this.appointmentService.deleteAllAppointmentsByStaffName(
+			staffName
+		);
+		await this.staffService.deleteByName(staffName);
+		res.json({ data: true });
+	}
 
-  public async deleteStaff(req: Request, res: Response): Promise<void> {
-    const staffName = req.query.staffName as string;
-    await this.appointmentService.deleteAllAppointmentsByStaffName(staffName);
-    await this.staffService.deleteByName(staffName);
-    res.json({ data: true });
-  }
-
-  public async getAllStaffData(_req: Request, res: Response): Promise<void> {
-    const staffs = await this.staffService.getAll();
-    res.json({ data: staffs });
-  }
+	public async getAllStaffData(_req: Request, res: Response): Promise<void> {
+		const staffs = await this.staffService.getAll();
+		res.json({ data: staffs });
+	}
 }
 
 export default StaffController;

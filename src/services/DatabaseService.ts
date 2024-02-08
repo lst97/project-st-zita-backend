@@ -1,35 +1,34 @@
-import { Service } from "typedi";
-import { Database } from "sqlite";
-import * as DatabaseUtils from "../utils/database";
+import { Service } from 'typedi';
+import sqlite3 from 'sqlite3';
+import * as DbConstants from '../constants/DatabaseConstants';
 
 @Service()
 export class DatabaseService {
-  private db: Database | null = null;
+	private db: sqlite3.Database;
 
-  async connect() {
-    this.db = await DatabaseUtils.openDatabase();
-  }
+	constructor() {
+		this.db = new sqlite3.Database(DbConstants.CONNECTION_STRING, (err) => {
+			if (err) {
+				console.error('Error opening database', err);
+				throw err; // Consider handling this error more gracefully
+			}
+			console.log('Database connection established');
+		});
 
-  async close() {
-    if (this.db) {
-      await this.db.close();
-      this.db = null;
-    }
-  }
+		process.on('SIGINT', this.closeConnection.bind(this));
+	}
 
-  // Example method to get data from the database
-  async getData(query: string): Promise<any[]> {
-    if (!this.db) {
-      throw new Error("Database not connected");
-    }
-    return this.db.all(query);
-  }
+	private closeConnection(): void {
+		this.db.close((err) => {
+			if (err) {
+				console.error('Error closing the database connection', err);
+				return;
+			}
+			console.log('Database connection closed');
+		});
+	}
 
-  // Example method to execute a query like INSERT, UPDATE, DELETE
-  async runQuery(query: string): Promise<void> {
-    if (!this.db) {
-      throw new Error("Database not connected");
-    }
-    await this.db.exec(query);
-  }
+	public getDatabase(): sqlite3.Database {
+		return this.db;
+	}
 }
