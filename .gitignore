@@ -1,2 +1,7 @@
 /node_modules
 /.env
+
+/dist
+dist/services/AppointmentService.js
+data.db
+dist/server.js
