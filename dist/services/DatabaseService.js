@@ -61,7 +61,6 @@ let DatabaseService = class DatabaseService {
                 else {
                     console.log('Database connection closed');
                 }
-                // Explicitly exit the process
                 process.exit(err ? 1 : 0);
             });
         }

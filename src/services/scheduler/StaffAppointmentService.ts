@@ -7,28 +7,22 @@ import { Service } from 'typedi';
 
 @Service()
 export class StaffAppointmentService {
-	private staffService: StaffService;
-	private appointmentRepository: StaffAppointmentRepository;
-
 	constructor(
-		staffService: StaffService,
-		appointmentRepository: StaffAppointmentRepository
-	) {
-		this.staffService = staffService;
-		this.appointmentRepository = appointmentRepository;
-	}
+		private staffService: StaffService,
+		private appointmentRepository: StaffAppointmentRepository
+	) {}
 
 	public async createAppointments(
 		appointmentsData: AppointmentData[]
 	): Promise<AppointmentData[]> {
 		// Can optimize this by using groupBy
 		const staffs = await this.staffService.getAll();
-		const staffIdMap = new Map<string, string>();
-		staffs.forEach((staff) => {
-			staffIdMap.set(staff.name, staff.id);
-		});
+		const staffIdMap = staffs.reduce((map, staff) => {
+			map.set(staff.name, staff.id);
+			return map;
+		}, new Map<string, string>());
 
-		const appointmentsDbModels = new Array<StaffAppointmentDbModel>();
+		const appointmentsDbModels: StaffAppointmentDbModel[] = [];
 		appointmentsData.forEach((appointment) => {
 			const staffId = staffIdMap.get(appointment.staffName);
 
@@ -66,10 +60,10 @@ export class StaffAppointmentService {
 
 	private async buildStaffNameMap(): Promise<Map<string, string>> {
 		const staffs = await this.staffService.getAll();
-		const staffNameMap = new Map<string, string>();
-		staffs.forEach((staff) => {
-			staffNameMap.set(staff.id, staff.name);
-		});
+		const staffNameMap = staffs.reduce((map, staff) => {
+			map.set(staff.id, staff.name);
+			return map;
+		}, new Map<string, string>());
 		return staffNameMap;
 	}
 
@@ -77,7 +71,7 @@ export class StaffAppointmentService {
 		appointmentDbModels: StaffAppointmentDbModel[],
 		staffNameMap: Map<string, string>
 	): AppointmentData[] {
-		const appointments = new Array<AppointmentData>();
+		const appointments: AppointmentData[] = [];
 
 		for (const appointmentDbModel of appointmentDbModels) {
 			const staffName = staffNameMap.get(appointmentDbModel.staffId);

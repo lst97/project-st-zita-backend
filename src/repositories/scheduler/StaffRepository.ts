@@ -2,135 +2,85 @@ import { DatabaseService } from '../../services/DatabaseService';
 import IStaffRepository from './interfaces/IStaffRepository';
 import StaffDbModel from '../../models/database/Staff';
 import { Service } from 'typedi';
+import { allAsync, getAsync, runAsync } from '../../utils/SQLiteHelper';
 
 @Service()
 class StaffRepository implements IStaffRepository {
 	constructor(private databaseService: DatabaseService) {}
 
 	async findByName(name: string): Promise<StaffDbModel | null> {
-		return new Promise((resolve, reject) => {
-			const db = this.databaseService.getDatabase();
-			db.get(
-				'SELECT * FROM Staffs WHERE name = ?',
-				[name],
-				(err, row: StaffDbModel | undefined) => {
-					if (err) {
-						reject(err);
-					} else if (row) {
-						resolve(row);
-					} else {
-						resolve(null);
-					}
-				}
-			);
-		});
+		return (await getAsync(
+			this.databaseService.getDatabase(),
+			'SELECT * FROM Staffs WHERE name = ?',
+			[name]
+		)) as StaffDbModel | null;
 	}
 
 	async create(staff: StaffDbModel): Promise<StaffDbModel> {
-		return new Promise((resolve, reject) => {
-			const db = this.databaseService.getDatabase();
-			db.run(
-				'INSERT INTO Staffs (id, name, email, phoneNumber, image, color, createDate, modifyDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-				[
-					staff.id,
-					staff.name,
-					staff.email,
-					staff.phoneNumber,
-					staff.image,
-					staff.color
-				],
-				(err) => {
-					if (err) {
-						reject(err);
-					} else {
-						resolve(staff);
-					}
-				}
-			);
-		});
+		await runAsync(
+			this.databaseService.getDatabase(),
+			'INSERT INTO Staffs (id, name, email, phoneNumber, image, color, createDate, modifyDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+			[
+				staff.id,
+				staff.name,
+				staff.email,
+				staff.phoneNumber,
+				staff.image,
+				staff.color,
+				staff.createDate,
+				staff.modifyDate
+			]
+		);
+		return staff;
 	}
 
 	async findById(id: string): Promise<StaffDbModel | null> {
-		return new Promise((resolve, reject) => {
-			const db = this.databaseService.getDatabase();
-			db.get(
-				'SELECT * FROM Staffs WHERE id = ?',
-				[id],
-				(err, row: StaffDbModel | undefined) => {
-					if (err) {
-						reject(err);
-					} else if (row) {
-						resolve(row);
-					} else {
-						resolve(null);
-					}
-				}
-			);
-		});
+		return (await getAsync(
+			this.databaseService.getDatabase(),
+			'SELECT * FROM Staffs WHERE id = ?',
+			[id]
+		)) as StaffDbModel | null;
 	}
 
 	async findAll(): Promise<StaffDbModel[]> {
-		return new Promise((resolve, reject) => {
-			const db = this.databaseService.getDatabase();
-			db.all('SELECT * FROM Staffs', (err, rows: StaffDbModel[]) => {
-				if (err) {
-					reject(err);
-				} else {
-					resolve(rows);
-				}
-			});
-		});
+		return (await allAsync(
+			this.databaseService.getDatabase(),
+			'SELECT * FROM Staffs',
+			[]
+		)) as StaffDbModel[];
 	}
 
 	async update(staff: StaffDbModel): Promise<StaffDbModel> {
-		return new Promise((resolve, reject) => {
-			const db = this.databaseService.getDatabase();
-			db.run(
-				'UPDATE Staffs SET name = ?, email = ?, phoneNumber = ?, image = ?, color = ?, modifyDate = ? WHERE id = ?',
-				[
-					staff.name,
-					staff.email,
-					staff.phoneNumber,
-					staff.image,
-					staff.color,
-					staff.modifyDate,
-					staff.id
-				],
-				(err) => {
-					if (err) {
-						reject(err);
-					} else {
-						resolve(staff);
-					}
-				}
-			);
-		});
+		await runAsync(
+			this.databaseService.getDatabase(),
+			'UPDATE Staffs SET name = ?, email = ?, phoneNumber = ?, image = ?, color = ?, modifyDate = ? WHERE id = ?',
+			[
+				staff.name,
+				staff.email,
+				staff.phoneNumber,
+				staff.image,
+				staff.color,
+				staff.modifyDate,
+				staff.id
+			]
+		);
+		return staff;
 	}
 
 	async deleteById(id: string): Promise<void> {
-		return new Promise((resolve, reject) => {
-			const db = this.databaseService.getDatabase();
-			db.run('DELETE FROM Staffs WHERE id = ?', [id], (err) => {
-				if (err) {
-					reject(err);
-				} else {
-					resolve();
-				}
-			});
-		});
+		await runAsync(
+			this.databaseService.getDatabase(),
+			'DELETE FROM Staffs WHERE id = ?',
+			[id]
+		);
 	}
 
 	async deleteByName(name: string): Promise<void> {
-		return new Promise((resolve, reject) => {
-			const db = this.databaseService.getDatabase();
-			db.run('DELETE FROM Staffs WHERE name = ?', [name], (err) => {
-				if (err) {
-					reject(err);
-				} else {
-					resolve();
-				}
-			});
-		});
+		await runAsync(
+			this.databaseService.getDatabase(),
+			'DELETE FROM Staffs WHERE name = ?',
+			[name]
+		);
 	}
 }
 
