@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 
-interface StaffDbModelProps {
+interface StaffDbModelParams {
 	id?: string;
 	name: string;
 	email?: string;
@@ -30,7 +30,7 @@ class StaffDbModel {
 		image,
 		createDate = new Date().toISOString(),
 		modifyDate = new Date().toISOString()
-	}: StaffDbModelProps) {
+	}: StaffDbModelParams) {
 		this.id = id;
 		this.name = name;
 		this.color = color;

@@ -48,16 +48,28 @@ let DatabaseService = class DatabaseService {
             }
             console.log('Database connection established');
         });
+        // exit application
         process.on('SIGINT', this.closeConnection.bind(this));
     }
     closeConnection() {
-        this.db.close((err) => {
-            if (err) {
-                console.error('Error closing the database connection', err);
-                return;
-            }
-            console.log('Database connection closed');
-        });
+        // Check if the db object exists and is open before attempting to close
+        if (this.db) {
+            this.db.close((err) => {
+                if (err) {
+                    console.error('Error closing the database connection', err);
+                }
+                else {
+                    console.log('Database connection closed');
+                }
+                // Explicitly exit the process
+                process.exit(err ? 1 : 0);
+            });
+        }
+        else {
+            // If the database is already closed or not initialized, exit the process
+            console.log('Database was not open or already closed');
+            process.exit(0);
+        }
     }
     getDatabase() {
         return this.db;
