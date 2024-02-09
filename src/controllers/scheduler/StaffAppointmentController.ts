@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
-import { StaffAppointmentService as AppointmentService } from '../../services/scheduler/StaffAppointmentService';
+import { StaffAppointmentService } from '../../services/scheduler/StaffAppointmentService';
 import { AppointmentData } from '../../models/share/scheduler/StaffAppointmentData';
 import { Service } from 'typedi';
 
 @Service()
 export class StaffAppointmentController {
-	constructor(private appointmentService: AppointmentService) {}
+	constructor(private appointmentService: StaffAppointmentService) {}
 
 	public async createAppointments(
 		req: Request,
