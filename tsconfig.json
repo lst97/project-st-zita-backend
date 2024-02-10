@@ -2,6 +2,7 @@
 	"compilerOptions": {
 		"target": "es6",
 		"module": "commonjs",
+		"moduleResolution": "node",
 		"outDir": "./dist",
 		"rootDir": "./src",
 		"strict": true,
@@ -10,5 +11,6 @@
 		"emitDecoratorMetadata": true
 	},
 	"include": ["src/**/*"],
-	"exclude": ["node_modules", "**/*.spec.ts"]
+	"exclude": ["node_modules", "**/*.spec.ts"],
+	"files": ["src/models/express/@types/index.d.ts"]
 }

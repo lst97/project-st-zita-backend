@@ -5,6 +5,7 @@ import { hashPassword, verifyPassword } from '../../utils/HashHelper';
 import jwt from 'jsonwebtoken';
 import { RegistrationForm } from '../../models/forms/auth/RegistrationForm';
 import UserDbModel from '../../models/database/User';
+import { JwtPayload } from '../../models/Auth/JwtPayload';
 
 @Service()
 class AuthService {
@@ -16,11 +17,10 @@ class AuthService {
 			return null;
 		}
 
-		const passwordHash = await hashPassword(form.password);
-		if (await verifyPassword(passwordHash, userDbModel.passwordHash)) {
-			console.log(
-				`client hashed password: ${passwordHash}, db hashed password: ${userDbModel.passwordHash}`
-			);
+		if (
+			(await verifyPassword(form.password, userDbModel.passwordHash)) ==
+			false
+		) {
 			return null;
 		}
 
@@ -33,7 +33,7 @@ class AuthService {
 
 		const accessToken = jwt.sign(
 			{
-				id: userDbModel.id,
+				id: userDbModel.id!,
 				username: userDbModel.username,
 				email: userDbModel.email,
 				role,

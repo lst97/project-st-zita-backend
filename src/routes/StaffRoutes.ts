@@ -1,6 +1,7 @@
 import express from 'express';
 import StaffController from '../controllers/scheduler/StaffController';
 import { Container } from 'typedi';
+import { verifyToken } from '../middleware/request/JwtMiddleware';
 
 // TODO: add asyncHandler middleware (sprint 2)
 /// Example
@@ -20,8 +21,14 @@ const router = express.Router();
 
 const staffController = Container.get(StaffController);
 
-router.post('/staffs', (req, res) => staffController.createStaff(req, res));
-router.delete('/staffs', (req, res) => staffController.deleteStaff(req, res));
-router.get('/staffs', (req, res) => staffController.getAllStaffData(req, res));
+router.post('/staffs', verifyToken, (req, res) =>
+	staffController.createStaff(req, res)
+);
+router.delete('/staffs', verifyToken, (req, res) =>
+	staffController.deleteStaff(req, res)
+);
+router.get('/staffs', verifyToken, (req, res) =>
+	staffController.getAllStaffData(req, res)
+);
 
 export default router;

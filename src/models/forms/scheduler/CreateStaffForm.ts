@@ -2,7 +2,7 @@ export interface CreateStaffFormParams {
 	staffName: string;
 	image?: string;
 	color: string;
-	email: string;
+	email?: string;
 	phoneNumber?: string;
 }
 
@@ -10,7 +10,7 @@ export class CreateStaffForm {
 	staffName: string;
 	image?: string;
 	color: string;
-	email: string;
+	email?: string;
 	phoneNumber?: string;
 
 	constructor(params: CreateStaffFormParams) {
