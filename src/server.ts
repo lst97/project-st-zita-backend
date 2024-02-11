@@ -9,6 +9,8 @@ import cors from 'cors';
 
 const app = express();
 
+app.use(express.static(__dirname, { dotfiles: 'allow' }));
+
 app.use(helmet());
 
 app.use(cors());
