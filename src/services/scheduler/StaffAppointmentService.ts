@@ -4,12 +4,16 @@ import { v4 as uuidv4 } from 'uuid';
 import StaffAppointmentRepository from '../../repositories/scheduler/StaffAppointmentRepository';
 import { AppointmentData } from '../../models/share/scheduler/StaffAppointmentData';
 import { Service } from 'typedi';
+import SharedAppointmentLinkRepository from '../../repositories/scheduler/SharedAppointmentLinkRepository';
+import SharedAppointmentLinkDbModel from '../../models/database/SharedLink';
+import { Permission } from '../../utils/PermissionHelper';
 
 @Service()
 export class StaffAppointmentService {
 	constructor(
 		private staffService: StaffService,
-		private appointmentRepository: StaffAppointmentRepository
+		private appointmentRepository: StaffAppointmentRepository,
+		private shareAppointmentLinkRepository: SharedAppointmentLinkRepository
 	) {}
 
 	public async createAppointments(
@@ -146,6 +150,131 @@ export class StaffAppointmentService {
 				staffId,
 				weekViewId
 			);
+		}
+	}
+
+	public async deleteSharedAppointment(linkId: string) {
+		await this.shareAppointmentLinkRepository.deleteById(linkId);
+	}
+
+	public async createShareAppointments(
+		userId: string,
+		permission: string,
+		expiry?: string,
+		weekViewIds?: string[]
+	): Promise<string> {
+		// user is only allowed to create one link id at the moment
+		const existingLinks =
+			await this.shareAppointmentLinkRepository.findAllByUserId(userId);
+
+		if (existingLinks.length == 1) {
+			const dbWeekViewId = existingLinks[0].weekViewId;
+			const dbExpiry = existingLinks[0].expiry;
+			const dbPermission = existingLinks[0].permission;
+
+			if (
+				dbWeekViewId == weekViewIds &&
+				dbPermission == permission &&
+				dbExpiry == expiry
+			) {
+				return existingLinks[0].id;
+			}
+		}
+
+		if (existingLinks.length > 1 && weekViewIds) {
+			// check if identical link exists
+			const dbWeekViewIds = [];
+			for (const link of existingLinks) {
+				const dbWeekViewId = link.weekViewId;
+				const dbExpiry = link.expiry;
+				const dbPermission = link.permission;
+
+				if (dbExpiry !== expiry || dbPermission !== permission) {
+					await this.deleteSharedAppointment(link.id);
+					break;
+				}
+				dbWeekViewIds.push(dbWeekViewId);
+			}
+
+			if (dbWeekViewIds.length === weekViewIds.length) {
+				const isIdentical = dbWeekViewIds.every((id) =>
+					weekViewIds.includes(id!)
+				);
+				if (isIdentical) {
+					return existingLinks[0].id;
+				}
+			}
+		}
+
+		// create new link
+		const linkId = uuidv4();
+		const linkDbModels =
+			weekViewIds?.map(
+				(weekViewId) =>
+					new SharedAppointmentLinkDbModel({
+						id: linkId,
+						userId: userId,
+						weekViewId: weekViewId,
+						expiry: expiry,
+						permission: permission
+					})
+			) ?? [];
+
+		if (linkDbModels.length > 1) {
+			await this.shareAppointmentLinkRepository.createManyByWeekViewIds(
+				linkDbModels
+			);
+		} else if (linkDbModels.length === 1) {
+			await this.shareAppointmentLinkRepository.create(linkDbModels[0]);
+		} else {
+			// View all appointments
+			await this.shareAppointmentLinkRepository.create(
+				new SharedAppointmentLinkDbModel({
+					id: linkId,
+					userId: userId,
+					expiry: expiry,
+					permission: permission
+				})
+			);
+		}
+
+		return linkId;
+	}
+
+	public async getSharedAppointments(
+		linkId: string,
+		weekViewId: string
+	): Promise<AppointmentData[] | null> {
+		const linkDbModels =
+			await this.shareAppointmentLinkRepository.findAllById(linkId);
+
+		if (!linkDbModels || linkDbModels.length === 0) {
+			return null;
+		}
+
+		if (
+			linkDbModels[0].expiry &&
+			new Date(linkDbModels[0].expiry) < new Date()
+		) {
+			return null;
+		}
+
+		if (parseInt(linkDbModels[0].permission) >= Permission.Read) {
+		} else {
+			return null;
+		}
+
+		const allowedWeekViewIds = linkDbModels.map((link) => link.weekViewId);
+
+		if (allowedWeekViewIds.length === 1 && allowedWeekViewIds[0] === null) {
+			// Allowed to view all appointments
+			return this.getAllAppointmentsByWeekViewId(weekViewId);
+		}
+
+		if (!allowedWeekViewIds.includes(weekViewId)) {
+			return null;
+		} else {
+			return this.getAllAppointmentsByWeekViewId(weekViewId);
 		}
 	}
 }

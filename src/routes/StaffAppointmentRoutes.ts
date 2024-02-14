@@ -22,4 +22,12 @@ router.delete('/appointments/week_view/:id', verifyToken, (req, res) =>
 	)
 );
 
+router.post('/appointments/share', verifyToken, (req, res) =>
+	staffAppointmentController.createShareAppointments(req, res)
+);
+
+router.get('/shared_appointments/:id', (req, res) =>
+	staffAppointmentController.getSharedAppointments(req, res)
+);
+
 export default router;

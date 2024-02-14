@@ -5,7 +5,7 @@ import { hashPassword, verifyPassword } from '../../utils/HashHelper';
 import jwt from 'jsonwebtoken';
 import { RegistrationForm } from '../../models/forms/auth/RegistrationForm';
 import UserDbModel from '../../models/database/User';
-import { JwtPayload } from '../../models/Auth/JwtPayload';
+import { JwtPayload } from '../../models/auth/JwtPayload';
 
 @Service()
 class AuthService {
