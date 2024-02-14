@@ -6,30 +6,8 @@ import appointmentRoutes from './routes/StaffAppointmentRoutes';
 import authenticationRoutes from './routes/AuthenticateRoutes';
 import { API_ENDPOINT, PORT } from './constants/ServerConstants';
 import cors from 'cors';
-import fs from 'fs';
-import https from 'https';
 
 const app = express();
-
-// Certificate
-const privateKey = fs.readFileSync(
-	'/etc/letsencrypt/live/lst97.tplinkdns.com/privkey.pem',
-	'utf8'
-);
-const certificate = fs.readFileSync(
-	'/etc/letsencrypt/live/lst97.tplinkdns.com/cert.pem',
-	'utf8'
-);
-const ca = fs.readFileSync(
-	'/etc/letsencrypt/live/lst97.tplinkdns.com/chain.pem',
-	'utf8'
-);
-
-const credentials = {
-	key: privateKey,
-	cert: certificate,
-	ca: ca
-};
 
 app.use(helmet());
 
@@ -41,9 +19,7 @@ app.use(`${API_ENDPOINT}`, staffRoutes);
 app.use(`${API_ENDPOINT}`, appointmentRoutes);
 app.use(`${API_ENDPOINT}`, authenticationRoutes);
 
-const httpsServer = https.createServer(credentials, app);
-
-httpsServer.listen(`${PORT}`, () => {
+app.listen(`${PORT}`, () => {
 	console.log(`Server running on port ${PORT}`);
 });
 

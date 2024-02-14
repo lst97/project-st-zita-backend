@@ -37,12 +37,8 @@ class StaffDbModel {
 		this.email = email;
 		this.phoneNumber = phoneNumber;
 		this.image = image;
-		if (createDate) {
-			this.createDate = createDate;
-		}
-		if (modifyDate) {
-			this.modifyDate = modifyDate;
-		}
+		this.createDate = createDate;
+		this.modifyDate = modifyDate;
 	}
 }
 

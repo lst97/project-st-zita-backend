@@ -10,7 +10,7 @@ class StaffService {
 
 	public async create(staffForm: CreateStaffForm): Promise<StaffDbModel> {
 		const staff = new StaffDbModel({
-			name: staffForm.name,
+			name: staffForm.staffName,
 			email: staffForm.email,
 			phoneNumber: staffForm.phoneNumber,
 			image: staffForm.image,

@@ -1,3 +1,13 @@
 {
-	"cSpell.words": ["deepcode", "typedi", "uuidv", "zita"]
+	"cSpell.words": [
+		"deepcode",
+		"dotfiles",
+		"letsencrypt",
+		"privkey",
+		"signin",
+		"tplinkdns",
+		"typedi",
+		"uuidv",
+		"zita"
+	]
 }
