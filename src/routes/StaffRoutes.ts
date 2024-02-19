@@ -19,16 +19,17 @@ import { verifyToken } from '../middleware/request/JwtMiddleware';
 
 const router = express.Router();
 
-const staffController = Container.get(StaffController);
-
-router.post('/staffs', verifyToken, (req, res) =>
-	staffController.createStaff(req, res)
-);
-router.delete('/staffs', verifyToken, (req, res) =>
-	staffController.deleteStaff(req, res)
-);
-router.get('/staffs', verifyToken, (req, res) =>
-	staffController.getAllStaffData(req, res)
-);
+router.post('/staffs', verifyToken, (req, res) => {
+	const staffController = Container.get(StaffController);
+	staffController.createStaff(req, res);
+});
+router.delete('/staffs', verifyToken, (req, res) => {
+	const staffController = Container.get(StaffController);
+	staffController.deleteStaff(req, res);
+});
+router.get('/staffs', verifyToken, (req, res) => {
+	const staffController = Container.get(StaffController);
+	staffController.getAllStaffData(req, res);
+});
 
 export default router;

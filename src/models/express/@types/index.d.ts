@@ -1,7 +1,12 @@
 import { JwtPayload } from '../../auth/JwtPayload';
 
-declare module 'express-serve-static-core' {
-	export interface Request {
-		user: JwtPayload;
+export {};
+
+declare global {
+	namespace Express {
+		export interface Request {
+			user: JwtPayload;
+			id: string;
+		}
 	}
 }

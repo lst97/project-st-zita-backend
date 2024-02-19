@@ -6,6 +6,7 @@ import appointmentRoutes from './routes/StaffAppointmentRoutes';
 import authenticationRoutes from './routes/AuthenticateRoutes';
 import { API_ENDPOINT, PORT } from './constants/ServerConstants';
 import cors from 'cors';
+import { requestId } from './middleware/request/RequestIdMiddleware';
 
 const app = express();
 
@@ -14,6 +15,8 @@ app.use(helmet());
 app.use(cors());
 
 app.use(express.json());
+
+app.use(requestId);
 
 app.use(`${API_ENDPOINT}`, staffRoutes);
 app.use(`${API_ENDPOINT}`, appointmentRoutes);

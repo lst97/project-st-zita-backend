@@ -1,0 +1,56 @@
+{
+	"Common": {
+		"OperationSuccess": {
+			"Code": "SUCCESS",
+			"Message": "Operation completed successfully",
+			"StatusCode": 200
+		},
+		"OperationFail": {
+			"Code": "FAILED",
+			"Message": "Internal server error occurred",
+			"StatusCode": 500
+		},
+		"ResourceNotFound": {
+			"Code": "NOT_FOUND",
+			"Message": "Resource not found",
+			"StatusCode": 404
+		}
+	},
+	"Sql": {
+		"OperationSuccess": {
+			"Code": "QUERY_SUCCESS",
+			"Message": "Query executed successfully",
+			"StatusCode": 200
+		},
+		"OperationFail": {
+			"Code": "QUERY_FAILED",
+			"Message": "Query execution failed",
+			"StatusCode": 500
+		},
+		"RecordExists": {
+			"Code": "RECORD_EXISTS",
+			"Message": "Record already exists",
+			"StatusCode": 409
+		},
+		"RecordNotFound": {
+			"Code": "RECORD_NOT_FOUND",
+			"Message": "Record not found",
+			"StatusCode": 404
+		},
+		"CreateFail": {
+			"Code": "RECORD_CREATE_FAILED",
+			"Message": "Record creation failed",
+			"StatusCode": 500
+		},
+		"UpdateFail": {
+			"Code": "RECORD_UPDATE_FAILED",
+			"Message": "Record update failed",
+			"StatusCode": 500
+		},
+		"DeleteFail": {
+			"Code": "RECORD_DELETE_FAILED",
+			"Message": "Record deletion failed",
+			"StatusCode": 500
+		}
+	}
+}
