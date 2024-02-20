@@ -1,4 +1,3 @@
-import StaffService from './StaffService';
 import StaffAppointmentDbModel from '../../models/database/StaffAppointment';
 import { v4 as uuidv4 } from 'uuid';
 import StaffAppointmentRepository from '../../repositories/scheduler/StaffAppointmentRepository';
@@ -7,11 +6,12 @@ import { Service } from 'typedi';
 import SharedAppointmentLinkRepository from '../../repositories/scheduler/SharedAppointmentLinkRepository';
 import SharedAppointmentLinkDbModel from '../../models/database/SharedLink';
 import { Permission } from '../../utils/PermissionHelper';
+import StaffRepository from '../../repositories/scheduler/StaffRepository';
 
 @Service()
 export class StaffAppointmentService {
 	constructor(
-		private staffService: StaffService,
+		private staffRepository: StaffRepository,
 		private appointmentRepository: StaffAppointmentRepository,
 		private shareAppointmentLinkRepository: SharedAppointmentLinkRepository
 	) {}
@@ -20,7 +20,7 @@ export class StaffAppointmentService {
 		appointmentsData: AppointmentData[]
 	): Promise<AppointmentData[]> {
 		// Can optimize this by using groupBy
-		const staffs = await this.staffService.getAll();
+		const staffs = await this.staffRepository.findAll();
 		const staffIdMap = staffs.reduce((map, staff) => {
 			map.set(staff.name, staff.id);
 			return map;
@@ -63,7 +63,7 @@ export class StaffAppointmentService {
 	}
 
 	private async buildStaffNameMap(): Promise<Map<string, string>> {
-		const staffs = await this.staffService.getAll();
+		const staffs = await this.staffRepository.findAll();
 		const staffNameMap = staffs.reduce((map, staff) => {
 			map.set(staff.id, staff.name);
 			return map;
@@ -121,7 +121,7 @@ export class StaffAppointmentService {
 		staffName: string,
 		weekViewId: string
 	) {
-		const staffId = await this.staffService.getIdByName(staffName);
+		const staffId = (await this.staffRepository.findByName(staffName))?.id;
 		if (!staffId) {
 			return;
 		}
@@ -135,7 +135,7 @@ export class StaffAppointmentService {
 	public async deleteAllAppointmentsByStaffName(
 		staffName: string
 	): Promise<void> {
-		const staffId = await this.staffService.getIdByName(staffName);
+		const staffId = (await this.staffRepository.findByName(staffName))?.id;
 		if (!staffId) {
 			return;
 		}
