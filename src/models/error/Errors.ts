@@ -1,10 +1,25 @@
 import Container from 'typedi';
 import { MessageCodeService } from '../../services/response/MessageCodeService';
 import { v4 as uuidv4 } from 'uuid';
+import { Request } from 'express';
 
 interface SqlErrorParams {
 	message?: string;
 	query?: string;
+	cause?: Error;
+}
+
+interface ClientAuthErrorParams {
+	message?: string;
+	messageCode?: string;
+	cause?: Error;
+	request?: Request;
+	userId?: string;
+}
+
+interface AuthErrorParams {
+	message?: string;
+	messageCode?: string;
 	cause?: Error;
 }
 
@@ -83,6 +98,158 @@ export class ServerError extends DefinedBaseError {
 	}
 }
 
+export class ServerInvalidEnvConfigError extends ServerError {
+	constructor({ message }: ServerErrorParams) {
+		const defaultMessage =
+			Container.get(MessageCodeService).Messages.Server.InvalidEnvConfig;
+
+		super({
+			message: message || defaultMessage.Message,
+			messageCode: defaultMessage.Code
+		});
+	}
+}
+
+export class ServerResourceNotFoundError extends DefinedBaseError {
+	constructor(message?: string) {
+		const defaultMessage =
+			Container.get(MessageCodeService).Messages.Common.ResourceNotFound;
+
+		super(
+			message || defaultMessage.Message,
+			defaultMessage.StatusCode,
+			defaultMessage.Code
+		);
+	}
+}
+
+export class ClientAuthError extends DefinedBaseError {
+	userId?: string;
+	request?: Request;
+
+	constructor({
+		message,
+		messageCode,
+		cause,
+		request,
+		userId
+	}: ClientAuthErrorParams) {
+		const defaultMessage =
+			Container.get(MessageCodeService).Messages.Auth.AuthFail;
+
+		const responseMessage = messageCode
+			? Container.get(MessageCodeService).getResponseMessageByCode(
+					messageCode
+			  )
+			: null;
+
+		super(
+			message ?? responseMessage?.Message ?? defaultMessage.Message,
+			responseMessage?.StatusCode ?? defaultMessage.StatusCode,
+			messageCode ?? defaultMessage.Code
+		);
+
+		if (cause === undefined) {
+			this.cause = cause;
+		}
+
+		this.request = request;
+		this.userId = userId;
+	}
+}
+
+export class AuthAccessDeniedError extends ClientAuthError {
+	constructor({ message, request, userId }: ClientAuthErrorParams) {
+		const defaultMessage =
+			Container.get(MessageCodeService).Messages.Common.AccessDenied;
+
+		super({
+			message: message || defaultMessage.Message,
+			messageCode: defaultMessage.Code,
+			request,
+			userId
+		});
+	}
+}
+
+export class AuthInvalidEmailError extends ClientAuthError {
+	constructor({ message, messageCode, cause }: AuthErrorParams) {
+		const defaultMessage =
+			Container.get(MessageCodeService).Messages.Auth.InvalidEmail;
+
+		super({
+			message: message || defaultMessage.Message,
+			messageCode: messageCode || defaultMessage.Code,
+			cause
+		});
+	}
+}
+
+export class AuthInvalidPasswordError extends ClientAuthError {
+	constructor({ message, messageCode, cause }: AuthErrorParams) {
+		const defaultMessage =
+			Container.get(MessageCodeService).Messages.Auth.InvalidPassword;
+
+		super({
+			message: message || defaultMessage.Message,
+			messageCode: messageCode || defaultMessage.Code,
+			cause
+		});
+	}
+}
+
+export class AuthInvalidCredentialsError extends ClientAuthError {
+	constructor({ message, messageCode, cause }: AuthErrorParams) {
+		const defaultMessage =
+			Container.get(MessageCodeService).Messages.Auth.InvalidCredentials;
+
+		super({
+			message: message || defaultMessage.Message,
+			messageCode: messageCode || defaultMessage.Code,
+			cause
+		});
+	}
+}
+
+export class AuthAccessTokenExpiredError extends ClientAuthError {
+	constructor({ message, messageCode, cause }: AuthErrorParams) {
+		const defaultMessage =
+			Container.get(MessageCodeService).Messages.Auth.AccessTokenExpired;
+
+		super({
+			message: message || defaultMessage.Message,
+			messageCode: messageCode || defaultMessage.Code,
+			cause
+		});
+	}
+}
+
+export class AuthAccessTokenInvalidError extends ClientAuthError {
+	constructor({ message, messageCode, cause }: AuthErrorParams) {
+		const defaultMessage =
+			Container.get(MessageCodeService).Messages.Auth.AccessTokenInvalid;
+
+		super({
+			message: message || defaultMessage.Message,
+			messageCode: messageCode || defaultMessage.Code,
+			cause
+		});
+	}
+}
+
+export class AuthAccessTokenMissingError extends ClientAuthError {
+	constructor({ message, messageCode, cause }: AuthErrorParams) {
+		const defaultMessage =
+			Container.get(MessageCodeService).Messages.Auth.AccessTokenMissing;
+
+		super({
+			message: message || defaultMessage.Message,
+			messageCode: messageCode || defaultMessage.Code,
+			cause
+		});
+	}
+}
+//////////// Layer specific errors
 export class ServiceError extends DefinedBaseError {
 	// Generic service error
 	constructor({ message, messageCode, cause }: ServiceErrorParams) {
@@ -150,32 +317,7 @@ export class DatabaseError extends DefinedBaseError {
 	}
 }
 
-export class ServerResourceNotFoundError extends DefinedBaseError {
-	constructor(message?: string) {
-		const defaultMessage =
-			Container.get(MessageCodeService).Messages.Common.ResourceNotFound;
-
-		super(
-			message || defaultMessage.Message,
-			defaultMessage.StatusCode,
-			defaultMessage.Code
-		);
-	}
-}
-
-export class ServerInternalError extends DefinedBaseError {
-	constructor(message?: string) {
-		const defaultMessage =
-			Container.get(MessageCodeService).Messages.Common.OperationFail;
-
-		super(
-			message || defaultMessage.Message,
-			defaultMessage.StatusCode,
-			defaultMessage.Code
-		);
-	}
-}
-
+//////////// Leaf errors (database)
 export class SqlCreateError extends DatabaseError {
 	constructor({ message, query, cause }: SqlErrorParams) {
 		const defaultMessage =

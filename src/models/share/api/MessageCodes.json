@@ -14,6 +14,60 @@
 			"Code": "NOT_FOUND",
 			"Message": "Resource not found",
 			"StatusCode": 404
+		},
+		"AccessDenied": {
+			"Code": "ACCESS_DENIED",
+			"Message": "Access denied",
+			"StatusCode": 403
+		}
+	},
+	"Server": {
+		"InvalidEnvConfig": {
+			"Code": "MISSING_ENV_CONFIG",
+			"Message": "Environment configuration missing",
+			"StatusCode": 500
+		},
+		"ServerStop": {
+			"Code": "SERVER_STOP",
+			"Message": "Server stopped successfully",
+			"StatusCode": 200
+		}
+	},
+	"Auth": {
+		"AuthFail": {
+			"Code": "AUTH_FAILED",
+			"Message": "Authentication failed",
+			"StatusCode": 401
+		},
+		"InvalidCredentials": {
+			"Code": "INVALID_CREDENTIALS",
+			"Message": "Invalid username or password",
+			"StatusCode": 401
+		},
+		"AccessTokenExpired": {
+			"Code": "ACCESS_TOKEN_EXPIRED",
+			"Message": "Session expired, please login again",
+			"StatusCode": 401
+		},
+		"AccessTokenInvalid": {
+			"Code": "INVALID_ACCESS_TOKEN",
+			"Message": "Invalid access token",
+			"StatusCode": 401
+		},
+		"AccessTokenMissing": {
+			"Code": "ACCESS_TOKEN_MISSING",
+			"Message": "Access token is missing",
+			"StatusCode": 401
+		},
+		"InvalidEmail": {
+			"Code": "INVALID_EMAIL",
+			"Message": "Invalid email address",
+			"StatusCode": 400
+		},
+		"InvalidPassword": {
+			"Code": "INVALID_PASSWORD",
+			"Message": "Invalid password",
+			"StatusCode": 400
 		}
 	},
 	"Sql": {

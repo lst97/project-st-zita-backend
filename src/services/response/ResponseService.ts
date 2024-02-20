@@ -5,7 +5,7 @@ import BackendStandardResponse, {
 } from '../../models/share/api/Response';
 import ErrorHandlerService from '../ErrorHandlerService';
 import { MessageCodeService } from './MessageCodeService';
-import DefinedBaseError from '../../models/error/Errors';
+import DefinedBaseError, { ServerError } from '../../models/error/Errors';
 
 @Service()
 class ResponseService {
@@ -19,14 +19,11 @@ class ResponseService {
 		requestId: string,
 		httpStatus?: number
 	): void {
-		// default as internal server error
-		let message = new ResponseMessage(
-			this.messageCodeService.Messages.Common.OperationFail.Code,
-			this.messageCodeService.Messages.Common.OperationFail.Message
-		);
+		let message = null;
 		let traceId = '';
 
 		if (!(error instanceof DefinedBaseError)) {
+			// TODO: extract the traceId from the error
 			this.errorHandlerService.handleUnknownError({
 				error: error as Error,
 				service: this.sendError.caller.name
@@ -46,21 +43,30 @@ class ResponseService {
 			httpStatus = error.httpStatus;
 		}
 
+		if (error instanceof ServerError || !message) {
+			message = new ResponseMessage(
+				this.messageCodeService.Messages.Common.OperationFail.Code,
+				this.messageCodeService.Messages.Common.OperationFail.Message
+			);
+		}
+
 		const response = new BackendStandardResponse({
 			status: 'error',
 			message: message,
 			requestId: requestId,
 			traceId: traceId
 		});
-		res.status(httpStatus ?? 500).json({ response });
+		res.status(httpStatus ?? 500).json(response);
 	}
 
 	public sendSuccess(
 		res: Response,
 		data: any,
 		requestId: string,
-		status: number = 200
+		status?: number
 	): void {
+		status = status ?? 200;
+
 		const response = new BackendStandardResponse({
 			status: 'success',
 			message: new ResponseMessage(

@@ -1,6 +1,7 @@
 import { Service } from 'typedi';
 
 import DefinedBaseError, {
+	ClientAuthError,
 	ControllerError,
 	DatabaseError,
 	ServerError,
@@ -45,9 +46,11 @@ interface HandleUnknownErrorParams {
 	error: Error;
 	service: string;
 }
+
+// TODO: need to clean up the errorChains using the traceId when the request is done to prevent memory leak
 @Service()
 class ErrorHandlerService {
-	private errorStacks: Map<string, Error[]> = new Map();
+	private errorChains: Map<string, DefinedBaseError> = new Map();
 
 	constructor(private logger: LogService) {}
 
@@ -75,10 +78,11 @@ class ErrorHandlerService {
 	}
 
 	private _handleError<T extends DefinedBaseError>(error: T): void {
-		if (this.errorStacks.has(error.traceId)) {
-			this.errorStacks.get(error.traceId)!.push(error);
+		if (this.errorChains.has(error.traceId)) {
+			error.cause = this.errorChains.get(error.traceId);
+			this.errorChains.set(error.traceId, error);
 		} else {
-			this.errorStacks.set(error.traceId, [error]);
+			this.errorChains.set(error.traceId, error);
 		}
 
 		this.log(error);
@@ -96,6 +100,10 @@ class ErrorHandlerService {
 		this._handleError(error);
 	}
 
+	private handleClientAuthError(error: ClientAuthError): void {
+		this._handleError(error);
+	}
+
 	private _handleUnknownError(error: Error): void {
 		const unknownError = new UnknownError({ cause: error });
 		const serverError = new ServerError({ cause: unknownError });
@@ -106,41 +114,36 @@ class ErrorHandlerService {
 		this._handleError(error);
 	}
 
-	public getRootCause(traceId: string): Error | null {
-		if (this.errorStacks.has(traceId)) {
-			return this.errorStacks.get(traceId)![0];
-		}
-		return null;
-	}
-
 	public getDefinedBaseError(traceId: string): DefinedBaseError | null {
-		if (this.errorStacks.has(traceId)) {
-			for (let error of this.errorStacks.get(traceId)!) {
-				if (error instanceof DefinedBaseError) {
-					return error;
-				}
+		if (this.errorChains.has(traceId)) {
+			let chain = this.errorChains.get(traceId);
+
+			let rootBaseError = chain;
+			while (chain?.cause && chain.cause instanceof DefinedBaseError) {
+				rootBaseError = chain;
+				chain = chain.cause;
 			}
+
+			return rootBaseError!;
 		}
 		return null;
 	}
 
-	public handleError({ error, service, traceId }: HandleErrorParams): void {
+	public handleError({ error, service }: HandleErrorParams): void {
 		this.logger.setServiceName(service);
 
-		if (traceId) {
-			this.errorStacks.get(traceId)!.push(error);
+		if (error instanceof DatabaseError) {
+			this.handleSqlError(error);
+		} else if (error instanceof ServiceError) {
+			this.handleServiceError(error);
+		} else if (error instanceof ControllerError) {
+			this.handleControllerError(error);
+		} else if (error instanceof ServerError) {
+			this.handleServerError(error);
+		} else if (error instanceof ClientAuthError) {
+			this.handleClientAuthError(error);
 		} else {
-			if (error instanceof DatabaseError) {
-				this.handleSqlError(error);
-			} else if (error instanceof ServiceError) {
-				this.handleServiceError(error);
-			} else if (error instanceof ControllerError) {
-				this.handleControllerError(error);
-			} else if (error instanceof ServerError) {
-				this.handleServerError(error);
-			} else {
-				this._handleUnknownError(error);
-			}
+			this._handleUnknownError(error);
 		}
 	}
 

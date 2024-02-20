@@ -23,7 +23,7 @@ class StaffController {
 			this.responseService.sendSuccess(
 				res,
 				staffDbModel,
-				req.headers.id as string
+				req.headers.requestId as string
 			);
 		} catch (error) {
 			if (!(error instanceof DefinedBaseError)) {
@@ -46,7 +46,7 @@ class StaffController {
 			this.responseService.sendSuccess(
 				res,
 				true,
-				req.headers.id as string
+				req.headers.requestId as string
 			);
 		} catch (error) {
 			if (!(error instanceof DefinedBaseError)) {

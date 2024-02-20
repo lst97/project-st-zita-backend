@@ -1,27 +1,36 @@
 import { Request, Response } from 'express';
 import { Service } from 'typedi';
-import jwt from 'jsonwebtoken';
 
 import dotenv from 'dotenv';
 import { SignInForm } from '../../models/forms/auth/SignInForm';
 import AuthService from '../../services/auth/AuthService';
 import { RegistrationForm } from '../../models/forms/auth/RegistrationForm';
+import ResponseService from '../../services/response/ResponseService';
 dotenv.config();
 
 @Service()
 class AuthenticateController {
-	constructor(private authService: AuthService) {}
+	constructor(
+		private authService: AuthService,
+		private responseService: ResponseService
+	) {}
 
 	public async signin(req: Request, res: Response): Promise<void> {
 		const signinForm = req.body as SignInForm;
-		const accessToken = await this.authService.signin(signinForm);
-		if (!accessToken) {
-			// Unauthorized
-			res.status(401).send('Invalid email or password.');
-			return;
+		try {
+			const accessToken = await this.authService.signin(signinForm);
+			this.responseService.sendSuccess(
+				res,
+				accessToken,
+				req.headers.requestId as string
+			);
+		} catch (error) {
+			this.responseService.sendError(
+				res,
+				error as Error,
+				req.headers.requestId as string
+			);
 		}
-
-		res.json({ data: accessToken });
 	}
 
 	public async register(req: Request, res: Response): Promise<void> {

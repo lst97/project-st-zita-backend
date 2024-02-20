@@ -5,47 +5,103 @@ import { hashPassword, verifyPassword } from '../../utils/HashHelper';
 import jwt from 'jsonwebtoken';
 import { RegistrationForm } from '../../models/forms/auth/RegistrationForm';
 import UserDbModel from '../../models/database/User';
-import { JwtPayload } from '../../models/auth/JwtPayload';
+import ErrorHandlerService from '../ErrorHandlerService';
+import {
+	AuthInvalidEmailError,
+	AuthInvalidPasswordError,
+	ClientAuthError,
+	ServerInvalidEnvConfigError,
+	ServiceError
+} from '../../models/error/Errors';
 
 @Service()
 class AuthService {
-	constructor(private userRepository: UserRepository) {}
+	constructor(
+		private userRepository: UserRepository,
+		private errorHandlerService: ErrorHandlerService
+	) {}
 
-	public async signin(form: SignInForm): Promise<string | null> {
-		const userDbModel = await this.userRepository.findByEmail(form.email);
-		if (!userDbModel) {
-			return null;
-		}
+	public async signin(form: SignInForm): Promise<string> {
+		try {
+			const userDbModel = await this.userRepository.findByEmail(
+				form.email
+			);
 
-		if (
-			(await verifyPassword(form.password, userDbModel.passwordHash)) ==
-			false
-		) {
-			return null;
-		}
+			if (!userDbModel) {
+				const autError = new AuthInvalidEmailError({
+					message: `Email not registered`
+				});
 
-		const role = 'NOT_IMPLEMENTED';
-		const permission = 'NOT_IMPLEMENTED';
-		const secret = process.env.ACCESS_TOKEN_SECRET;
-		if (!secret) {
-			throw new Error('ACCESS_TOKEN_SECRET is not set in .env file.');
-		}
+				this.errorHandlerService.handleError({
+					error: autError,
+					service: AuthService.name
+				});
 
-		const accessToken = jwt.sign(
-			{
-				id: userDbModel.id!,
-				username: userDbModel.username,
-				email: userDbModel.email,
-				role,
-				permission
-			},
-			secret,
-			{
-				expiresIn: '28d'
+				throw autError;
 			}
-		);
 
-		return accessToken;
+			if (
+				(await verifyPassword(
+					form.password,
+					userDbModel.passwordHash
+				)) == false
+			) {
+				const authError = new AuthInvalidPasswordError({
+					message: `Incorrect password`
+				});
+
+				this.errorHandlerService.handleError({
+					error: authError,
+					service: AuthService.name
+				});
+
+				throw authError;
+			}
+
+			const role = 'NOT_IMPLEMENTED';
+			const permission = 'NOT_IMPLEMENTED';
+			const secret = process.env.ACCESS_TOKEN_SECRET;
+			if (!secret) {
+				const error = new ServerInvalidEnvConfigError({
+					message: 'ACCESS_TOKEN_SECRET is not set in .env file.'
+				});
+				this.errorHandlerService.handleError({
+					error: error,
+					service: AuthService.name
+				});
+				throw error;
+			}
+
+			const accessToken = jwt.sign(
+				{
+					id: userDbModel.id!,
+					username: userDbModel.username,
+					email: userDbModel.email,
+					role,
+					permission
+				},
+				secret,
+				{
+					expiresIn: '28d'
+				}
+			);
+
+			return accessToken;
+		} catch (error) {
+			if (
+				!(
+					error instanceof ClientAuthError ||
+					error instanceof ServerInvalidEnvConfigError
+				)
+			) {
+				this.errorHandlerService.handleUnknownServiceError({
+					error: error as Error,
+					service: AuthService.name,
+					errorType: ServiceError
+				});
+			}
+			throw error;
+		}
 	}
 
 	public async register(form: RegistrationForm): Promise<UserDbModel | null> {
