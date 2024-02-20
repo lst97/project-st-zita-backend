@@ -15,43 +15,44 @@ class ResponseService {
 	) {}
 	public sendError(
 		res: Response,
-		error: DefinedBaseError,
+		error: Error,
 		requestId: string,
-		status?: number
+		httpStatus?: number
 	): void {
 		// default as internal server error
 		let message = new ResponseMessage(
 			this.messageCodeService.Messages.Common.OperationFail.Code,
 			this.messageCodeService.Messages.Common.OperationFail.Message
 		);
+		let traceId = '';
 
-		if (error.traceId === undefined) {
-			const response = new BackendStandardResponse({
-				status: 'error',
-				message: message,
-				requestId: requestId
+		if (!(error instanceof DefinedBaseError)) {
+			this.errorHandlerService.handleUnknownError({
+				error: error as Error,
+				service: this.sendError.caller.name
 			});
-			res.status(status ?? 500).json({ response });
 		} else {
-			const rootCause = this.errorHandlerService.getRootCause(
+			const rootCause = this.errorHandlerService.getDefinedBaseError(
 				error.traceId
-			);
-			let status;
-			if (rootCause instanceof DefinedBaseError) {
-				message = new ResponseMessage(
-					rootCause.messageCode,
-					rootCause.userMessage
-				);
-				status = rootCause.httpStatus;
-			}
+			)!;
 
-			const response = new BackendStandardResponse({
-				status: 'error',
-				message: message,
-				requestId: requestId
-			});
-			res.status(status ?? 500).json({ response });
+			message = new ResponseMessage(
+				rootCause.messageCode,
+				rootCause.userMessage
+			);
+
+			traceId = rootCause.traceId;
+
+			httpStatus = error.httpStatus;
 		}
+
+		const response = new BackendStandardResponse({
+			status: 'error',
+			message: message,
+			requestId: requestId,
+			traceId: traceId
+		});
+		res.status(httpStatus ?? 500).json({ response });
 	}
 
 	public sendSuccess(

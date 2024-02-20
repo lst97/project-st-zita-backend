@@ -2,10 +2,105 @@ import sqlite3, { Database } from 'sqlite3';
 import { DatabaseError } from '../models/error/Errors';
 import { Service } from 'typedi';
 import ErrorHandlerService from '../services/ErrorHandlerService';
+import { DatabaseService } from '../services/DatabaseService';
+
+class SQLite3Transaction {
+	private databaseService: DatabaseService;
+
+	constructor(databaseService: DatabaseService) {
+		this.databaseService = databaseService;
+	}
+
+	async beginTransactionAsyncWithErrorHandling(): Promise<Database> {
+		try {
+			const db = this.databaseService.getDatabase();
+			return await beginTransactionAsync(db);
+		} catch (error) {
+			throw new DatabaseError({
+				cause: error as Error
+			});
+		}
+	}
+
+	static async commitTransactionAsyncWithErrorHandling(
+		db: Database
+	): Promise<void> {
+		try {
+			await commitTransactionAsync(db);
+		} catch (error) {
+			throw new DatabaseError({
+				cause: error as Error
+			});
+		}
+	}
+
+	static async rollbackTransactionAsyncWithErrorHandling(
+		db: Database
+	): Promise<void> {
+		try {
+			await rollbackTransactionAsync(db);
+		} catch (error) {
+			throw new DatabaseError({
+				cause: error as Error
+			});
+		}
+	}
+}
+
+function beginTransactionAsync(db: Database): Promise<Database> {
+	return new Promise((resolve, reject) => {
+		db.serialize(() => {
+			db.run('BEGIN', (err) => {
+				if (err) {
+					reject(err);
+				}
+				resolve(db);
+			});
+		});
+	});
+}
+
+function commitTransactionAsync(db: Database): Promise<void> {
+	return new Promise((resolve, reject) => {
+		db.run('COMMIT', (err) => {
+			if (err) {
+				reject(err);
+			}
+			resolve();
+		});
+	});
+}
+
+function rollbackTransactionAsync(db: Database): Promise<void> {
+	return new Promise((resolve, reject) => {
+		db.run('ROLLBACK', (err) => {
+			if (err) {
+				reject(err);
+			}
+			resolve();
+		});
+	});
+}
 
 @Service()
 export class SQLite3QueryService {
-	constructor(private errorHandlerService: ErrorHandlerService) {}
+	constructor(
+		private errorHandlerService: ErrorHandlerService,
+		private databaseService: DatabaseService
+	) {}
+
+	async beginTransactionAsync(): Promise<Database> {
+		const transaction = new SQLite3Transaction(this.databaseService);
+		return await transaction.beginTransactionAsyncWithErrorHandling();
+	}
+
+	async commitTransactionAsync(db: Database): Promise<void> {
+		await SQLite3Transaction.commitTransactionAsyncWithErrorHandling(db);
+	}
+
+	async rollbackTransactionAsync(db: Database): Promise<void> {
+		await SQLite3Transaction.rollbackTransactionAsyncWithErrorHandling(db);
+	}
 
 	async runWithSqlErrorHandlingAsync<T>(
 		db: Database,
@@ -60,20 +155,19 @@ export class SQLite3QueryService {
 		try {
 			return (await allAsync(db, query, params)) as T[];
 		} catch (error) {
-			const dbError = new errorType({
-				query,
-				cause: error as Error
-			});
-			this.errorHandlerService.handleError({
-				error: dbError,
+			throw this.errorHandlerService.handleUnknownDatabaseError({
+				error: error as Error,
 				service: SQLite3QueryService.name,
-				query: query
+				query: query,
+				errorType
 			});
-			throw dbError;
 		}
 	}
 }
 
+/**
+ * @deprecated Use runWithSqlErrorHandlingAsync instead.
+ */
 export function runAsync(
 	db: sqlite3.Database,
 	query: string,
@@ -96,6 +190,9 @@ export function runAsync(
 	});
 }
 
+/**
+ * @deprecated Use getWithSqlErrorHandlingAsync instead.
+ */
 export function getAsync(
 	db: sqlite3.Database,
 	query: string,
@@ -122,6 +219,9 @@ export function getAsync(
 	});
 }
 
+/**
+ * @deprecated Use allWithSqlErrorHandlingAsync instead.
+ */
 export function allAsync(
 	db: sqlite3.Database,
 	query: string,

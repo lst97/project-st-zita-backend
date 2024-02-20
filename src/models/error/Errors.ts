@@ -15,6 +15,23 @@ interface DatabaseErrorParams {
 	cause?: Error;
 }
 
+interface ServiceErrorParams {
+	message?: string;
+	messageCode?: string;
+	cause?: Error;
+}
+
+interface ServerErrorParams {
+	message?: string;
+	messageCode?: string;
+	cause?: Error;
+}
+
+interface UnknownErrorParams {
+	message?: string;
+	cause?: Error;
+}
+
 class DefinedBaseError extends Error {
 	httpStatus: number;
 	userMessage: string;
@@ -36,33 +53,63 @@ class DefinedBaseError extends Error {
 	}
 }
 
+export class UnknownError extends Error {
+	constructor({ message, cause }: UnknownErrorParams) {
+		super(message);
+		this.cause = cause;
+	}
+}
 export class ServerError extends DefinedBaseError {
-	constructor(message?: string) {
-		const defaultMessage =
-			Container.get(MessageCodeService).Messages.Common.OperationFail;
+	constructor({ message, messageCode, cause }: ServerErrorParams) {
+		const messageCodeService = Container.get(MessageCodeService);
+		const defaultFailedOperation =
+			messageCodeService.Messages.Common.OperationFail;
+
+		const responseMessage = messageCode
+			? messageCodeService.getResponseMessageByCode(messageCode)
+			: null;
 
 		super(
-			message || defaultMessage.Message,
-			defaultMessage.StatusCode,
-			defaultMessage.Code
+			message ??
+				responseMessage?.Message ??
+				defaultFailedOperation.Message,
+			responseMessage?.StatusCode ?? defaultFailedOperation.StatusCode,
+			messageCode ?? defaultFailedOperation.Code
 		);
+
+		if (this.cause === undefined) {
+			this.cause = cause;
+		}
 	}
 }
 
 export class ServiceError extends DefinedBaseError {
-	constructor(message?: string) {
-		const defaultMessage =
-			Container.get(MessageCodeService).Messages.Common.OperationFail;
+	// Generic service error
+	constructor({ message, messageCode, cause }: ServiceErrorParams) {
+		const messageCodeService = Container.get(MessageCodeService);
+		const defaultFailedOperation =
+			messageCodeService.Messages.Common.OperationFail;
+
+		const responseMessage = messageCode
+			? messageCodeService.getResponseMessageByCode(messageCode)
+			: null;
 
 		super(
-			message || defaultMessage.Message,
-			defaultMessage.StatusCode,
-			defaultMessage.Code
+			message ??
+				responseMessage?.Message ??
+				defaultFailedOperation.Message,
+			responseMessage?.StatusCode ?? defaultFailedOperation.StatusCode,
+			messageCode ?? defaultFailedOperation.Code
 		);
+
+		if (this.cause === undefined) {
+			this.cause = cause;
+		}
 	}
 }
 
 export class ControllerError extends DefinedBaseError {
+	// Generic controller error
 	constructor(message?: string) {
 		const defaultMessage =
 			Container.get(MessageCodeService).Messages.Common.OperationFail;
@@ -76,6 +123,7 @@ export class ControllerError extends DefinedBaseError {
 }
 
 export class DatabaseError extends DefinedBaseError {
+	// Generic database error
 	query?: string;
 
 	constructor({ message, messageCode, cause, query }: DatabaseErrorParams) {
@@ -96,7 +144,9 @@ export class DatabaseError extends DefinedBaseError {
 		);
 
 		this.query = query;
-		this.cause = cause;
+		if (this.cause === undefined && cause) {
+			this.cause = cause;
+		}
 	}
 }
 
@@ -214,6 +264,10 @@ export class SqlRecordExistsError extends DatabaseError {
 			messageCode: defaultMessage.Code,
 			cause
 		});
+
+		if (this.cause === undefined) {
+			this.cause = this;
+		}
 
 		this.query = query;
 	}

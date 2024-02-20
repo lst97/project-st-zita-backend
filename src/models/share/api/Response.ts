@@ -52,6 +52,7 @@ interface BackendStandardResponseInput<T> {
 	message: ResponseMessage;
 	data?: T;
 	requestId: string;
+	traceId?: string;
 	timestamp?: string; // ISO 8601 format
 	warnings?: ResponseWarning[];
 	version?: string;
@@ -65,6 +66,7 @@ class BackendStandardResponse<T> {
 	message: ResponseMessage;
 	data?: T;
 	requestId: string;
+	traceId?: string;
 	timestamp?: string;
 	warnings?: ResponseWarning[];
 	version?: string;
@@ -77,6 +79,7 @@ class BackendStandardResponse<T> {
 		this.message = input.message;
 		this.data = input.data;
 		this.requestId = input.requestId;
+		this.traceId = input.traceId;
 		this.timestamp = input.timestamp || new Date().toISOString();
 		this.warnings = input.warnings;
 		this.version = input.version || '1.0';
