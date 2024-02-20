@@ -1,4 +1,7 @@
-import { DatabaseService } from '../../services/DatabaseService';
+import {
+	DatabaseService,
+	SQLite3QueryService
+} from '../../services/DatabaseService';
 import IStaffRepository from './interfaces/IStaffRepository';
 import StaffDbModel from '../../models/database/Staff';
 import { Service } from 'typedi';
@@ -9,7 +12,7 @@ import {
 	SqlReadError,
 	SqlUpdateError
 } from '../../models/error/Errors';
-import { SQLite3QueryService } from '../../utils/SQLiteHelper';
+
 @Service()
 class StaffRepository implements IStaffRepository {
 	constructor(

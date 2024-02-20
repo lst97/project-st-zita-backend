@@ -1,6 +1,10 @@
-import { DatabaseService } from '../../services/DatabaseService';
+import {
+	DatabaseService,
+	allAsync,
+	getAsync,
+	runAsync
+} from '../../services/DatabaseService';
 import { Service } from 'typedi';
-import { allAsync, getAsync, runAsync } from '../../utils/SQLiteHelper';
 import IUserRepository from './interfaces/IUserRepository';
 import UserDbModel from '../../models/database/User';
 

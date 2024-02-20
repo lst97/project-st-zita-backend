@@ -1,8 +1,12 @@
 import IStaffAppointmentRepository from './interfaces/IStaffAppointmentRepository';
 import StaffAppointmentDbModel from '../../models/database/StaffAppointment';
 import { Service } from 'typedi';
-import { DatabaseService } from '../../services/DatabaseService';
-import { allAsync, getAsync, runAsync } from '../../utils/SQLiteHelper';
+import {
+	DatabaseService,
+	allAsync,
+	getAsync,
+	runAsync
+} from '../../services/DatabaseService';
 
 @Service()
 class StaffAppointmentRepository implements IStaffAppointmentRepository {

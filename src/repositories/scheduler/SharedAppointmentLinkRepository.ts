@@ -1,7 +1,10 @@
-import { DatabaseService } from '../../services/DatabaseService';
-import StaffDbModel from '../../models/database/Staff';
+import {
+	DatabaseService,
+	allAsync,
+	getAsync,
+	runAsync
+} from '../../services/DatabaseService';
 import { Service } from 'typedi';
-import { allAsync, getAsync, runAsync } from '../../utils/SQLiteHelper';
 import ISharedAppointmentLinkRepository from './interfaces/ISharedAppointmentLinkRepository';
 import SharedAppointmentLinkDbModel from '../../models/database/SharedLink';
 

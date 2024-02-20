@@ -10,7 +10,7 @@ import {
 	SqlRecordNotFoundError
 } from '../../models/error/Errors';
 import { StaffAppointmentService } from './StaffAppointmentService';
-import { SQLite3QueryService } from '../../utils/SQLiteHelper';
+import { SQLite3QueryService } from '../DatabaseService';
 
 @Service()
 class StaffService {
