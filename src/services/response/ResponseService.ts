@@ -21,7 +21,7 @@ class ResponseService {
 		error: Error,
 		requestId: string,
 		httpStatus?: number
-	): void {
+	): Response<any, Record<string, any>> {
 		let message = null;
 		let traceId = '';
 
@@ -63,7 +63,7 @@ class ResponseService {
 			requestId: requestId,
 			traceId: traceId
 		});
-		res.status(httpStatus ?? 500).json(response);
+		return res.status(httpStatus ?? 500).json(response);
 	}
 
 	public sendSuccess(
@@ -71,7 +71,7 @@ class ResponseService {
 		data: any,
 		requestId: string,
 		status?: number
-	): void {
+	): Response<any, Record<string, any>> {
 		status = status ?? 200;
 
 		const response = new BackendStandardResponse({
@@ -83,7 +83,7 @@ class ResponseService {
 			data: data,
 			requestId: requestId
 		});
-		res.status(status).json(response);
+		return res.status(status).json(response);
 	}
 }
 
