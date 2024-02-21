@@ -7,7 +7,9 @@ import ErrorHandlerService from '../ErrorHandlerService';
 import { MessageCodeService } from './MessageCodeService';
 import DefinedBaseError, {
 	DatabaseError,
-	ServerError
+	ServerError,
+	SqlRecordExistsError,
+	SqlRecordNotFoundError
 } from '../../models/error/Errors';
 
 @Service()
@@ -48,7 +50,11 @@ class ResponseService {
 
 		if (
 			error instanceof ServerError ||
-			error instanceof DatabaseError ||
+			(error instanceof DatabaseError &&
+				!(
+					error instanceof SqlRecordNotFoundError ||
+					error instanceof SqlRecordExistsError
+				)) ||
 			!message
 		) {
 			message = new ResponseMessage(

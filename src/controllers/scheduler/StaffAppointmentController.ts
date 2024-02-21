@@ -3,18 +3,43 @@ import { StaffAppointmentService } from '../../services/scheduler/StaffAppointme
 import { AppointmentData } from '../../models/share/scheduler/StaffAppointmentData';
 import { Service } from 'typedi';
 import { CreateShareLinkForm } from '../../models/forms/scheduler/CreateShareLinkForm';
+import ResponseService from '../../services/response/ResponseService';
+import ErrorHandlerService from '../../services/ErrorHandlerService';
 
 @Service()
 export class StaffAppointmentController {
-	constructor(private appointmentService: StaffAppointmentService) {}
+	constructor(
+		private appointmentService: StaffAppointmentService,
+		private responseService: ResponseService,
+		private errorHandlerService: ErrorHandlerService
+	) {}
 
 	public async createAppointments(
 		req: Request,
 		res: Response
 	): Promise<void> {
 		const appointsData = req.body as AppointmentData[];
-		await this.appointmentService.createAppointments(appointsData);
-		res.json({ data: true });
+		try {
+			await this.appointmentService.createAppointments(appointsData);
+			this.responseService.sendSuccess(
+				res,
+				true,
+				req.headers.requestId as string
+			);
+		} catch (error) {
+			if (error instanceof Error) {
+				this.errorHandlerService.handleUnknownError({
+					error: error,
+					service: StaffAppointmentController.name
+				});
+			}
+
+			this.responseService.sendError(
+				res,
+				error as Error,
+				req.headers.requestId as string
+			);
+		}
 	}
 
 	public async getAllAppointments(
@@ -32,11 +57,30 @@ export class StaffAppointmentController {
 	): Promise<void> {
 		const weekViewId = req.params.id;
 
-		const appointments =
-			await this.appointmentService.getAllAppointmentsByWeekViewId(
-				weekViewId
+		try {
+			const appointments =
+				await this.appointmentService.getAllAppointmentsByWeekViewId(
+					weekViewId
+				);
+			this.responseService.sendSuccess(
+				res,
+				appointments,
+				req.headers.requestId as string
 			);
-		res.json({ data: appointments });
+		} catch (error) {
+			if (error instanceof Error) {
+				this.errorHandlerService.handleUnknownError({
+					error: error,
+					service: StaffAppointmentController.name
+				});
+			}
+
+			this.responseService.sendError(
+				res,
+				error as Error,
+				req.headers.requestId as string
+			);
+		}
 	}
 
 	public async deleteAllAppointmentsByWeekViewIdAndStaffName(
@@ -45,11 +89,31 @@ export class StaffAppointmentController {
 	) {
 		const weekViewId = req.params.id;
 		const staffName = req.query.staffName as string;
-		await this.appointmentService.deleteAllAppointmentsByWeekViewIdAndStaffName(
-			staffName,
-			weekViewId
-		);
-		res.json({ data: true });
+
+		try {
+			await this.appointmentService.deleteAllAppointmentsByWeekViewIdAndStaffName(
+				staffName,
+				weekViewId
+			);
+			this.responseService.sendSuccess(
+				res,
+				true,
+				req.headers.requestId as string
+			);
+		} catch (error) {
+			if (error instanceof Error) {
+				this.errorHandlerService.handleUnknownError({
+					error: error,
+					service: StaffAppointmentController.name
+				});
+			}
+
+			this.responseService.sendError(
+				res,
+				error as Error,
+				req.headers.requestId as string
+			);
+		}
 	}
 
 	public async createShareAppointments(
@@ -59,13 +123,32 @@ export class StaffAppointmentController {
 		const shareLinkForm = req.body as CreateShareLinkForm;
 		shareLinkForm.userId = req.user.id;
 
-		const linkId = await this.appointmentService.createShareAppointments(
-			shareLinkForm.userId,
-			shareLinkForm.permission,
-			shareLinkForm.expiry,
-			shareLinkForm.weekViewIds
-		);
-		res.json({ data: linkId });
+		try {
+			await this.appointmentService.createShareAppointments(
+				shareLinkForm.userId,
+				shareLinkForm.permission,
+				shareLinkForm.expiry,
+				shareLinkForm.weekViewIds
+			);
+			this.responseService.sendSuccess(
+				res,
+				true,
+				req.headers.requestId as string
+			);
+		} catch (error) {
+			if (error instanceof Error) {
+				this.errorHandlerService.handleUnknownError({
+					error: error,
+					service: StaffAppointmentController.name
+				});
+			}
+
+			this.responseService.sendError(
+				res,
+				error as Error,
+				req.headers.requestId as string
+			);
+		}
 	}
 
 	public async getSharedAppointments(
@@ -75,11 +158,30 @@ export class StaffAppointmentController {
 		const linkId = req.params.id;
 		const weekViewId = req.query.weekViewId as string;
 
-		const appointments =
-			await this.appointmentService.getSharedAppointments(
-				linkId,
-				weekViewId
+		try {
+			const appointments =
+				await this.appointmentService.getSharedAppointments(
+					linkId,
+					weekViewId
+				);
+			this.responseService.sendSuccess(
+				res,
+				appointments,
+				req.headers.requestId as string
 			);
-		res.json({ data: appointments });
+		} catch (error) {
+			if (error instanceof Error) {
+				this.errorHandlerService.handleUnknownError({
+					error: error,
+					service: StaffAppointmentController.name
+				});
+			}
+
+			this.responseService.sendError(
+				res,
+				error as Error,
+				req.headers.requestId as string
+			);
+		}
 	}
 }

@@ -19,6 +19,11 @@
 			"Code": "ACCESS_DENIED",
 			"Message": "Access denied",
 			"StatusCode": 403
+		},
+		"PartialOperationFail": {
+			"Code": "PARTIAL_FAIL",
+			"Message": "Operation partially failed",
+			"StatusCode": 207
 		}
 	},
 	"Server": {

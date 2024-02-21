@@ -20,6 +20,12 @@ class StaffRepository implements IStaffRepository {
 		private queryService: SQLite3QueryService
 	) {}
 
+	/**
+	 * Finds a staff member by their name.
+	 * @param name - The name of the staff member to find.
+	 * @returns A promise that resolves to the found staff member or null if not found.
+	 * @throws {SqlReadError} If the query fails.
+	 */
 	async findByName(name: string): Promise<StaffDbModel | null> {
 		const query = 'SELECT * FROM Staffs WHERE name = ?';
 
@@ -31,6 +37,12 @@ class StaffRepository implements IStaffRepository {
 		)) as StaffDbModel | null;
 	}
 
+	/**
+	 * Creates a new staff member.
+	 * @param staff - The staff member to create.
+	 * @returns A promise that resolves to the created staff member.
+	 * @throws {SqlCreateError} If the query fails.
+	 */
 	async create(staff: StaffDbModel): Promise<StaffDbModel> {
 		const query =
 			'INSERT INTO Staffs (id, name, email, phoneNumber, image, color, createDate, modifyDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
@@ -53,6 +65,12 @@ class StaffRepository implements IStaffRepository {
 		return staff;
 	}
 
+	/**
+	 * Finds a staff member by their ID.
+	 * @param id - The ID of the staff member to find.
+	 * @returns A promise that resolves to the found staff member or null if not found.
+	 * @throws {SqlReadError} If the query fails.
+	 */
 	async findById(id: string): Promise<StaffDbModel | null> {
 		const query = 'SELECT * FROM Staffs WHERE id = ?';
 
@@ -64,6 +82,11 @@ class StaffRepository implements IStaffRepository {
 		)) as StaffDbModel | null;
 	}
 
+	/**
+	 * Finds all staff members.
+	 * @returns A promise that resolves to an array of all staff members.
+	 * @throws {SqlReadError} If the query fails.
+	 */
 	async findAll(): Promise<StaffDbModel[]> {
 		const query = 'SELECT * FROM Staffs';
 
@@ -75,6 +98,12 @@ class StaffRepository implements IStaffRepository {
 		)) as StaffDbModel[];
 	}
 
+	/**
+	 * Updates a staff member.
+	 * @param staff - The staff member to update.
+	 * @returns A promise that resolves to the updated staff member.
+	 * @throws {SqlUpdateError} If the query fails.
+	 */
 	async update(staff: StaffDbModel): Promise<StaffDbModel> {
 		const query =
 			'UPDATE Staffs SET name = ?, email = ?, phoneNumber = ?, image = ?, color = ?, modifyDate = ? WHERE id = ?';
@@ -97,6 +126,12 @@ class StaffRepository implements IStaffRepository {
 		return (await this.findById(staff.id)) as StaffDbModel;
 	}
 
+	/**
+	 * Deletes a staff member by their ID.
+	 * @param id - The ID of the staff member to delete.
+	 * @returns A promise that resolves when the staff member is deleted.
+	 * @throws {SqlDeleteError} If the query fails.
+	 */
 	async deleteById(id: string): Promise<void> {
 		// try {
 		// 	await this.findById(id);
@@ -116,6 +151,12 @@ class StaffRepository implements IStaffRepository {
 		);
 	}
 
+	/**
+	 * Deletes a staff member by their name.
+	 * @param name - The name of the staff member to delete.
+	 * @returns A promise that resolves when the staff member is deleted.
+	 * @throws {SqlDeleteError} If the query fails.
+	 */
 	async deleteByName(name: string): Promise<void> {
 		const query = 'DELETE FROM Staffs WHERE name = ?';
 

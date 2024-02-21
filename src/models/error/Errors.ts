@@ -17,6 +17,12 @@ interface ClientAuthErrorParams {
 	userId?: string;
 }
 
+interface PartialErrorParams {
+	message?: string;
+	messageCode?: string;
+	cause?: Error;
+}
+
 interface AuthErrorParams {
 	message?: string;
 	messageCode?: string;
@@ -345,6 +351,31 @@ export class DatabaseError extends DefinedBaseError {
 	}
 }
 
+export class PartialError extends DefinedBaseError {
+	// Partial error
+	constructor({ message, messageCode, cause }: PartialErrorParams) {
+		const messageCodeService = Container.get(MessageCodeService);
+		const defaultFailedOperation =
+			messageCodeService.Messages.Common.PartialOperationFail;
+
+		const responseMessage = messageCode
+			? messageCodeService.getResponseMessageByCode(messageCode)
+			: null;
+
+		super(
+			message ??
+				responseMessage?.Message ??
+				defaultFailedOperation.Message,
+			responseMessage?.StatusCode ?? defaultFailedOperation.StatusCode,
+			messageCode ?? defaultFailedOperation.Code
+		);
+
+		if (this.cause === undefined) {
+			this.cause = cause;
+		}
+	}
+}
+
 //////////// Leaf errors (database)
 export class SqlCreateError extends DatabaseError {
 	constructor({ message, query, cause }: SqlErrorParams) {
@@ -434,10 +465,6 @@ export class SqlRecordExistsError extends DatabaseError {
 			messageCode: defaultMessage.Code,
 			cause
 		});
-
-		if (this.cause === undefined) {
-			this.cause = this;
-		}
 
 		this.query = query;
 	}
