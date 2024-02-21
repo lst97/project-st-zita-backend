@@ -39,6 +39,11 @@
 			"Message": "Authentication failed",
 			"StatusCode": 401
 		},
+		"RegistrationFailWithDuplicatedEmail": {
+			"Code": "EMAIL_ALREADY_EXISTS",
+			"Message": "Email already exists",
+			"StatusCode": 409
+		},
 		"InvalidCredentials": {
 			"Code": "INVALID_CREDENTIALS",
 			"Message": "Invalid username or password",
@@ -65,8 +70,8 @@
 			"StatusCode": 400
 		},
 		"InvalidPassword": {
-			"Code": "INVALID_PASSWORD",
-			"Message": "Invalid password",
+			"Code": "INCORRECT_PASSWORD",
+			"Message": "Incorrect password",
 			"StatusCode": 400
 		}
 	},

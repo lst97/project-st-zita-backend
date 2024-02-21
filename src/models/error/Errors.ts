@@ -21,6 +21,7 @@ interface AuthErrorParams {
 	message?: string;
 	messageCode?: string;
 	cause?: Error;
+	request?: Request;
 }
 
 interface DatabaseErrorParams {
@@ -173,79 +174,106 @@ export class AuthAccessDeniedError extends ClientAuthError {
 }
 
 export class AuthInvalidEmailError extends ClientAuthError {
-	constructor({ message, messageCode, cause }: AuthErrorParams) {
+	constructor({ message, messageCode, cause, request }: AuthErrorParams) {
 		const defaultMessage =
 			Container.get(MessageCodeService).Messages.Auth.InvalidEmail;
 
 		super({
 			message: message || defaultMessage.Message,
 			messageCode: messageCode || defaultMessage.Code,
-			cause
+			cause: cause,
+			request: request,
+			userId: request?.user?.id
 		});
 	}
 }
 
+export class AuthRegistrationFailWithDuplicatedEmailError extends ClientAuthError {
+	constructor({ message, messageCode, cause, request }: AuthErrorParams) {
+		const defaultMessage =
+			Container.get(MessageCodeService).Messages.Auth
+				.RegistrationFailWithDuplicatedEmail;
+
+		super({
+			message: message || defaultMessage.Message,
+			messageCode: messageCode || defaultMessage.Code,
+			cause: cause,
+			request: request,
+			userId: request?.user?.id
+		});
+	}
+}
 export class AuthInvalidPasswordError extends ClientAuthError {
-	constructor({ message, messageCode, cause }: AuthErrorParams) {
+	constructor({ message, messageCode, cause, request }: AuthErrorParams) {
 		const defaultMessage =
 			Container.get(MessageCodeService).Messages.Auth.InvalidPassword;
 
 		super({
 			message: message || defaultMessage.Message,
 			messageCode: messageCode || defaultMessage.Code,
-			cause
+			cause: cause,
+			request: request,
+			userId: request?.user?.id
 		});
 	}
 }
 
 export class AuthInvalidCredentialsError extends ClientAuthError {
-	constructor({ message, messageCode, cause }: AuthErrorParams) {
+	constructor({ message, messageCode, cause, request }: AuthErrorParams) {
 		const defaultMessage =
 			Container.get(MessageCodeService).Messages.Auth.InvalidCredentials;
 
 		super({
 			message: message || defaultMessage.Message,
 			messageCode: messageCode || defaultMessage.Code,
-			cause
+			cause: cause,
+			request: request,
+			userId: request?.user?.id
 		});
 	}
 }
 
 export class AuthAccessTokenExpiredError extends ClientAuthError {
-	constructor({ message, messageCode, cause }: AuthErrorParams) {
+	constructor({ message, messageCode, cause, request }: AuthErrorParams) {
 		const defaultMessage =
 			Container.get(MessageCodeService).Messages.Auth.AccessTokenExpired;
 
 		super({
 			message: message || defaultMessage.Message,
 			messageCode: messageCode || defaultMessage.Code,
-			cause
+			cause: cause,
+			request: request,
+			userId: request?.user?.id
 		});
 	}
 }
 
 export class AuthAccessTokenInvalidError extends ClientAuthError {
-	constructor({ message, messageCode, cause }: AuthErrorParams) {
+	constructor({ message, messageCode, cause, request }: AuthErrorParams) {
 		const defaultMessage =
 			Container.get(MessageCodeService).Messages.Auth.AccessTokenInvalid;
 
 		super({
 			message: message || defaultMessage.Message,
 			messageCode: messageCode || defaultMessage.Code,
-			cause
+			cause: cause,
+			request: request,
+			userId: request?.user?.id
 		});
 	}
 }
 
 export class AuthAccessTokenMissingError extends ClientAuthError {
-	constructor({ message, messageCode, cause }: AuthErrorParams) {
+	constructor({ message, messageCode, cause, request }: AuthErrorParams) {
 		const defaultMessage =
 			Container.get(MessageCodeService).Messages.Auth.AccessTokenMissing;
 
 		super({
 			message: message || defaultMessage.Message,
 			messageCode: messageCode || defaultMessage.Code,
-			cause
+			cause: cause,
+			request: request,
+			userId: request?.user?.id
 		});
 	}
 }

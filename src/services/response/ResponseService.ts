@@ -5,7 +5,10 @@ import BackendStandardResponse, {
 } from '../../models/share/api/Response';
 import ErrorHandlerService from '../ErrorHandlerService';
 import { MessageCodeService } from './MessageCodeService';
-import DefinedBaseError, { ServerError } from '../../models/error/Errors';
+import DefinedBaseError, {
+	DatabaseError,
+	ServerError
+} from '../../models/error/Errors';
 
 @Service()
 class ResponseService {
@@ -26,7 +29,7 @@ class ResponseService {
 			// TODO: extract the traceId from the error
 			this.errorHandlerService.handleUnknownError({
 				error: error as Error,
-				service: this.sendError.caller.name
+				service: ResponseService.name
 			});
 		} else {
 			const rootCause = this.errorHandlerService.getDefinedBaseError(
@@ -43,7 +46,11 @@ class ResponseService {
 			httpStatus = error.httpStatus;
 		}
 
-		if (error instanceof ServerError || !message) {
+		if (
+			error instanceof ServerError ||
+			error instanceof DatabaseError ||
+			!message
+		) {
 			message = new ResponseMessage(
 				this.messageCodeService.Messages.Common.OperationFail.Code,
 				this.messageCodeService.Messages.Common.OperationFail.Message

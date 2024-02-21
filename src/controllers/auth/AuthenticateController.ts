@@ -18,7 +18,7 @@ class AuthenticateController {
 	public async signin(req: Request, res: Response): Promise<void> {
 		const signinForm = req.body as SignInForm;
 		try {
-			const accessToken = await this.authService.signin(signinForm);
+			const accessToken = await this.authService.signin(signinForm, req);
 			this.responseService.sendSuccess(
 				res,
 				accessToken,
@@ -35,7 +35,10 @@ class AuthenticateController {
 
 	public async register(req: Request, res: Response): Promise<void> {
 		const registrationForm = req.body as RegistrationForm;
-		const userDbModel = await this.authService.register(registrationForm);
+		const userDbModel = await this.authService.register(
+			registrationForm,
+			req
+		);
 		if (!userDbModel) {
 			res.status(401).send('User already exists.');
 			return;

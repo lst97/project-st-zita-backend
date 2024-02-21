@@ -9,10 +9,10 @@ import ErrorHandlerService from '../ErrorHandlerService';
 import {
 	AuthInvalidEmailError,
 	AuthInvalidPasswordError,
-	ClientAuthError,
-	ServerInvalidEnvConfigError,
-	ServiceError
+	AuthRegistrationFailWithDuplicatedEmailError,
+	ServerInvalidEnvConfigError
 } from '../../models/error/Errors';
+import { Request } from 'express';
 
 @Service()
 class AuthService {
@@ -21,94 +21,83 @@ class AuthService {
 		private errorHandlerService: ErrorHandlerService
 	) {}
 
-	public async signin(form: SignInForm): Promise<string> {
-		try {
-			const userDbModel = await this.userRepository.findByEmail(
-				form.email
-			);
+	public async signin(form: SignInForm, req: Request): Promise<string> {
+		const userDbModel = await this.userRepository.findByEmail(form.email);
 
-			if (!userDbModel) {
-				const autError = new AuthInvalidEmailError({
-					message: `Email not registered`
-				});
+		if (!userDbModel) {
+			const autError = new AuthInvalidEmailError({ request: req });
 
-				this.errorHandlerService.handleError({
-					error: autError,
-					service: AuthService.name
-				});
+			this.errorHandlerService.handleError({
+				error: autError,
+				service: AuthService.name
+			});
 
-				throw autError;
-			}
+			throw autError;
+		}
 
-			if (
-				(await verifyPassword(
-					form.password,
-					userDbModel.passwordHash
-				)) == false
-			) {
-				const authError = new AuthInvalidPasswordError({
-					message: `Incorrect password`
-				});
+		if (
+			(await verifyPassword(form.password, userDbModel.passwordHash)) ==
+			false
+		) {
+			const authError = new AuthInvalidPasswordError({
+				request: req
+			});
 
-				this.errorHandlerService.handleError({
-					error: authError,
-					service: AuthService.name
-				});
+			this.errorHandlerService.handleError({
+				error: authError,
+				service: AuthService.name
+			});
 
-				throw authError;
-			}
+			throw authError;
+		}
 
-			const role = 'NOT_IMPLEMENTED';
-			const permission = 'NOT_IMPLEMENTED';
-			const secret = process.env.ACCESS_TOKEN_SECRET;
-			if (!secret) {
-				const error = new ServerInvalidEnvConfigError({
-					message: 'ACCESS_TOKEN_SECRET is not set in .env file.'
-				});
-				this.errorHandlerService.handleError({
-					error: error,
-					service: AuthService.name
-				});
-				throw error;
-			}
-
-			const accessToken = jwt.sign(
-				{
-					id: userDbModel.id!,
-					username: userDbModel.username,
-					email: userDbModel.email,
-					role,
-					permission
-				},
-				secret,
-				{
-					expiresIn: '28d'
-				}
-			);
-
-			return accessToken;
-		} catch (error) {
-			if (
-				!(
-					error instanceof ClientAuthError ||
-					error instanceof ServerInvalidEnvConfigError
-				)
-			) {
-				this.errorHandlerService.handleUnknownServiceError({
-					error: error as Error,
-					service: AuthService.name,
-					errorType: ServiceError
-				});
-			}
+		const role = 'NOT_IMPLEMENTED';
+		const permission = 'NOT_IMPLEMENTED';
+		const secret = process.env.ACCESS_TOKEN_SECRET;
+		if (!secret) {
+			const error = new ServerInvalidEnvConfigError({
+				message: 'ACCESS_TOKEN_SECRET is not set in .env file.'
+			});
+			this.errorHandlerService.handleError({
+				error: error,
+				service: AuthService.name
+			});
 			throw error;
 		}
+
+		const accessToken = jwt.sign(
+			{
+				id: userDbModel.id!,
+				username: userDbModel.username,
+				email: userDbModel.email,
+				role,
+				permission
+			},
+			secret,
+			{
+				expiresIn: '28d'
+			}
+		);
+
+		return accessToken;
 	}
 
-	public async register(form: RegistrationForm): Promise<UserDbModel | null> {
+	public async register(
+		form: RegistrationForm,
+		req: Request
+	): Promise<UserDbModel> {
 		const userDbModel = await this.userRepository.findByEmail(form.email);
 		if (userDbModel) {
-			// User already exists
-			return null;
+			const autError = new AuthRegistrationFailWithDuplicatedEmailError(
+				{}
+			);
+
+			this.errorHandlerService.handleError({
+				error: autError,
+				service: AuthService.name
+			});
+
+			throw autError;
 		}
 
 		const passwordHash = await hashPassword(form.password);

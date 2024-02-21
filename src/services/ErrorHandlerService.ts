@@ -5,16 +5,17 @@ import DefinedBaseError, {
 	ControllerError,
 	DatabaseError,
 	ServerError,
-	ServiceError,
-	UnknownError
+	ServiceError
 } from '../models/error/Errors';
 import LogService from './LogService';
+import { Request } from 'express';
 
 interface HandleErrorParams {
 	error: Error;
 	service: string;
 	query?: string;
 	traceId?: string;
+	req?: Request;
 }
 
 interface HandleUnknownDatabaseErrorParams {
@@ -71,6 +72,10 @@ class ErrorHandlerService {
 				logMessage.push(`query: ${error.query ?? 'N/A'}`);
 			}
 
+			if (error instanceof ClientAuthError) {
+				logMessage.push(`userId: ${error.userId ?? 'N/A'}`);
+			}
+
 			this.logger.error(logMessage.join('\n'));
 		} else {
 			this.logger.error(`Unhandled error: ${error.message}`);
@@ -105,8 +110,7 @@ class ErrorHandlerService {
 	}
 
 	private _handleUnknownError(error: Error): void {
-		const unknownError = new UnknownError({ cause: error });
-		const serverError = new ServerError({ cause: unknownError });
+		const serverError = new ServerError({ cause: error });
 		this._handleError(serverError);
 	}
 
@@ -129,7 +133,7 @@ class ErrorHandlerService {
 		return null;
 	}
 
-	public handleError({ error, service }: HandleErrorParams): void {
+	public handleError({ error, service, req }: HandleErrorParams): void {
 		this.logger.setServiceName(service);
 
 		if (error instanceof DatabaseError) {
