@@ -215,7 +215,7 @@ export class SQLite3QueryService {
 		errorType: new (...args: any[]) => DatabaseError // Pass error constructor
 	): Promise<T> {
 		try {
-			return (await getAsync(db, query, params)) as T;
+			return (await runAsync(db, query, params)) as T;
 		} catch (error) {
 			const dbError = new errorType({
 				query,
@@ -295,10 +295,7 @@ export class SQLite3QueryService {
 	}
 }
 
-/**
- * @deprecated Use runWithSqlErrorHandlingAsync instead.
- */
-export function runAsync(
+function runAsync(
 	db: sqlite3.Database,
 	query: string,
 	params: any[]
@@ -320,10 +317,7 @@ export function runAsync(
 	});
 }
 
-/**
- * @deprecated Use getWithSqlErrorHandlingAsync instead.
- */
-export function getAsync(
+function getAsync(
 	db: sqlite3.Database,
 	query: string,
 	params: any[]
@@ -349,10 +343,7 @@ export function getAsync(
 	});
 }
 
-/**
- * @deprecated Use allWithSqlErrorHandlingAsync instead.
- */
-export function allAsync(
+function allAsync(
 	db: sqlite3.Database,
 	query: string,
 	params: any[]
