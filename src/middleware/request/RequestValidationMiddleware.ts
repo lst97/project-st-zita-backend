@@ -22,9 +22,21 @@ interface ValidationResult {
 }
 
 // 2. Validation Strategies
+/**
+ * Represents a validation strategy for validating request body.
+ */
 export class RequestBodyValidationStrategy implements ValidationStrategy {
+	/**
+	 * Creates an instance of RequestBodyValidationStrategy.
+	 * @param schema - The Joi schema used for validation.
+	 */
 	constructor(private schema: Joi.ObjectSchema) {}
 
+	/**
+	 * Validates the request body.
+	 * @param req - The request object.
+	 * @returns The validation result.
+	 */
 	validate(req: Request): ValidationResult {
 		const { error, value } = this.schema.validate(req.body, {
 			abortEarly: false
@@ -43,9 +55,21 @@ export class RequestBodyValidationStrategy implements ValidationStrategy {
 	}
 }
 
+/**
+ * Represents a validation strategy for request parameters.
+ */
 export class RequestParamValidationStrategy implements ValidationStrategy {
+	/**
+	 * Creates an instance of RequestParamValidationStrategy.
+	 * @param schema - The Joi schema used for validation.
+	 */
 	constructor(private schema: Joi.ObjectSchema) {}
 
+	/**
+	 * Validates the request parameters.
+	 * @param req - The request object.
+	 * @returns The validation result.
+	 */
 	validate(req: Request): ValidationResult {
 		const { error, value } = this.schema.validate(req.params, {
 			abortEarly: true
@@ -64,9 +88,21 @@ export class RequestParamValidationStrategy implements ValidationStrategy {
 	}
 }
 
+/**
+ * Represents a validation strategy for request query parameters.
+ */
 export class RequestQueryValidationStrategy implements ValidationStrategy {
+	/**
+	 * Creates an instance of RequestQueryValidationStrategy.
+	 * @param schema - The Joi schema used for validation.
+	 */
 	constructor(private schema: Joi.ObjectSchema) {}
 
+	/**
+	 * Validates the request query parameters.
+	 * @param req - The request object.
+	 * @returns The validation result.
+	 */
 	validate(req: Request): ValidationResult {
 		const { error, value } = this.schema.validate(req.query, {
 			abortEarly: true
@@ -86,6 +122,11 @@ export class RequestQueryValidationStrategy implements ValidationStrategy {
 }
 
 // 3. Generic Middleware
+/**
+ * Middleware function that performs request validation using a specified validation strategy.
+ * @param strategy The validation strategy to use.
+ * @returns The middleware function.
+ */
 export function requestValidator(strategy: ValidationStrategy) {
 	return async (req: Request, res: Response, next: NextFunction) => {
 		const responseService = Container.get(ResponseService);
