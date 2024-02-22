@@ -5,7 +5,8 @@ import DefinedBaseError, {
 	ControllerError,
 	DatabaseError,
 	ServerError,
-	ServiceError
+	ServiceError,
+	ValidationError
 } from '../models/error/Errors';
 import LogService from './LogService';
 import { Request } from 'express';
@@ -118,6 +119,10 @@ class ErrorHandlerService {
 		this._handleError(error);
 	}
 
+	private handleValidationError(error: ValidationError): void {
+		this._handleError(error);
+	}
+
 	public getDefinedBaseError(traceId: string): DefinedBaseError | null {
 		if (this.errorChains.has(traceId)) {
 			let chain = this.errorChains.get(traceId);
@@ -146,6 +151,8 @@ class ErrorHandlerService {
 			this.handleServerError(error);
 		} else if (error instanceof ClientAuthError) {
 			this.handleClientAuthError(error);
+		} else if (error instanceof ValidationError) {
+			this.handleValidationError(error);
 		} else {
 			this._handleUnknownError(error);
 		}

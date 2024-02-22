@@ -26,6 +26,28 @@
 			"StatusCode": 207
 		}
 	},
+	"Validation": {
+		"InvalidRequest": {
+			"Code": "INVALID_REQUEST",
+			"Message": "Invalid request",
+			"StatusCode": 400
+		},
+		"InvalidRequestForm": {
+			"Code": "INVALID_REQUEST_FORM",
+			"Message": "Invalid request form",
+			"StatusCode": 400
+		},
+		"InvalidRequestParameter": {
+			"Code": "INVALID_REQUEST_PARAMETER",
+			"Message": "Invalid request parameter",
+			"StatusCode": 400
+		},
+		"InvalidRequestQuery": {
+			"Code": "INVALID_REQUEST_QUERY",
+			"Message": "Invalid request query",
+			"StatusCode": 400
+		}
+	},
 	"Server": {
 		"InvalidEnvConfig": {
 			"Code": "MISSING_ENV_CONFIG",

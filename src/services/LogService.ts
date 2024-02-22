@@ -1,5 +1,6 @@
 import { Service } from 'typedi';
 import { createLogger, transports, format } from 'winston';
+import { consoleColorCodes } from '../utils/ColorHelper';
 
 @Service()
 class LogService {
@@ -11,6 +12,14 @@ class LogService {
 				format.colorize(),
 				format.timestamp(),
 				format.printf(({ timestamp, level, message, service }) => {
+					service =
+						consoleColorCodes.blue +
+						service +
+						consoleColorCodes.reset;
+					timestamp =
+						consoleColorCodes.gray +
+						timestamp +
+						consoleColorCodes.reset;
 					return `[${timestamp}] ${service} ${level}: ${message}`;
 				})
 			)

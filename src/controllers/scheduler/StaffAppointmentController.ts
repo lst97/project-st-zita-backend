@@ -124,7 +124,7 @@ export class StaffAppointmentController {
 		shareLinkForm.userId = req.user.id;
 
 		try {
-			await this.appointmentService.createShareAppointments(
+			const link = await this.appointmentService.createShareAppointments(
 				shareLinkForm.userId,
 				shareLinkForm.permission,
 				shareLinkForm.expiry,
@@ -132,7 +132,7 @@ export class StaffAppointmentController {
 			);
 			this.responseService.sendSuccess(
 				res,
-				true,
+				link,
 				req.headers.requestId as string
 			);
 		} catch (error) {

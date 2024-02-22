@@ -17,6 +17,13 @@ interface ClientAuthErrorParams {
 	userId?: string;
 }
 
+interface ValidationErrorParams {
+	message?: string;
+	messageCode?: string;
+	cause?: Error;
+	request?: Request;
+}
+
 interface PartialErrorParams {
 	message?: string;
 	messageCode?: string;
@@ -76,6 +83,7 @@ class DefinedBaseError extends Error {
 }
 
 export class UnknownError extends Error {
+	cause?: Error;
 	constructor({ message, cause }: UnknownErrorParams) {
 		super(message);
 		this.cause = cause;
@@ -127,6 +135,69 @@ export class ServerResourceNotFoundError extends DefinedBaseError {
 			defaultMessage.StatusCode,
 			defaultMessage.Code
 		);
+	}
+}
+
+export class ValidationError extends DefinedBaseError {
+	constructor({ message, messageCode, cause }: ValidationErrorParams) {
+		const defaultMessage =
+			Container.get(MessageCodeService).Messages.Validation
+				.InvalidRequest;
+
+		const responseMessage = messageCode
+			? Container.get(MessageCodeService).getResponseMessageByCode(
+					messageCode
+			  )
+			: null;
+
+		super(
+			message ?? responseMessage?.Message ?? defaultMessage.Message,
+			responseMessage?.StatusCode ?? defaultMessage.StatusCode,
+			messageCode ?? defaultMessage.Code
+		);
+
+		if (this.cause === undefined) {
+			this.cause = cause;
+		}
+	}
+}
+
+export class ValidateRequestFormError extends ValidationError {
+	constructor(message?: string) {
+		const defaultMessage =
+			Container.get(MessageCodeService).Messages.Validation
+				.InvalidRequestForm;
+
+		super({
+			message: message || defaultMessage.Message,
+			messageCode: defaultMessage.Code
+		});
+	}
+}
+
+export class ValidateRequestParamError extends ValidationError {
+	constructor(message?: string) {
+		const defaultMessage =
+			Container.get(MessageCodeService).Messages.Validation
+				.InvalidRequestParameter;
+
+		super({
+			message: message || defaultMessage.Message,
+			messageCode: defaultMessage.Code
+		});
+	}
+}
+
+export class ValidateRequestQueryError extends ValidationError {
+	constructor(message?: string) {
+		const defaultMessage =
+			Container.get(MessageCodeService).Messages.Validation
+				.InvalidRequestQuery;
+
+		super({
+			message: message || defaultMessage.Message,
+			messageCode: defaultMessage.Code
+		});
 	}
 }
 

@@ -4,6 +4,7 @@ export interface RegistrationFormParams {
 	password: string;
 	color: string;
 	image?: string;
+	phoneNumber?: string;
 }
 
 export class RegistrationForm {
@@ -12,18 +13,21 @@ export class RegistrationForm {
 	password: string;
 	color: string;
 	image?: string;
+	phoneNumber?: string;
 
 	constructor({
 		username,
 		email,
 		password,
 		color,
-		image
+		image,
+		phoneNumber
 	}: RegistrationFormParams) {
 		this.username = username;
 		this.email = email;
 		this.password = password;
 		this.color = color;
 		this.image = image;
+		this.phoneNumber = phoneNumber;
 	}
 }
