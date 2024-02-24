@@ -17,6 +17,12 @@ interface ClientAuthErrorParams {
 	userId?: string;
 }
 
+interface ExportErrorParams {
+	message?: string;
+	messageCode?: string;
+	cause?: Error;
+}
+
 interface ValidationErrorParams {
 	message?: string;
 	messageCode?: string;
@@ -87,6 +93,42 @@ export class UnknownError extends Error {
 	constructor({ message, cause }: UnknownErrorParams) {
 		super(message);
 		this.cause = cause;
+	}
+}
+
+export class ExportError extends DefinedBaseError {
+	constructor({ message, messageCode, cause }: ExportErrorParams) {
+		const defaultMessage =
+			Container.get(MessageCodeService).Messages.Export.ExportFail;
+
+		const responseMessage = messageCode
+			? Container.get(MessageCodeService).getResponseMessageByCode(
+					messageCode
+			  )
+			: null;
+
+		super(
+			message || responseMessage?.Message || defaultMessage.Message,
+			responseMessage?.StatusCode || defaultMessage.StatusCode,
+			messageCode || defaultMessage.Code
+		);
+
+		if (this.cause === undefined) {
+			this.cause = cause;
+		}
+	}
+}
+
+export class ExportAsExcelError extends ExportError {
+	constructor({ message, cause }: ExportErrorParams) {
+		const defaultMessage =
+			Container.get(MessageCodeService).Messages.Export.ExportAsExcelFail;
+
+		super({
+			message: message || defaultMessage.Message,
+			messageCode: defaultMessage.Code,
+			cause: cause
+		});
 	}
 }
 export class ServerError extends DefinedBaseError {

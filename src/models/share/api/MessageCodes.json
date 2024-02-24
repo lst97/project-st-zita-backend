@@ -138,5 +138,17 @@
 			"Message": "Record deletion failed",
 			"StatusCode": 500
 		}
+	},
+	"Export": {
+		"ExportFail": {
+			"Code": "EXPORT_FAILED",
+			"Message": "Export failed",
+			"StatusCode": 500
+		},
+		"ExportAsExcelFail": {
+			"Code": "EXPORT_AS_EXCEL_FAILED",
+			"Message": "Failed to export the data as xlsx",
+			"StatusCode": 500
+		}
 	}
 }

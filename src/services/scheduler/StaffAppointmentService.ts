@@ -13,6 +13,7 @@ import {
 } from '../../models/error/Errors';
 import StaffDbModel from '../../models/database/Staff';
 import ErrorHandlerService from '../ErrorHandlerService';
+import { ExportHelper, WeeklyExportStrategy } from '../../utils/ExportHelper';
 
 @Service()
 export class StaffAppointmentService {
@@ -345,5 +346,41 @@ export class StaffAppointmentService {
 		} else {
 			return this.getAllAppointmentsByWeekViewId(weekViewId);
 		}
+	}
+
+	public async getExportedAppointmentExcelBuffer(
+		startDate: string,
+		endDate: string,
+		method: string,
+		fileName: string
+	): Promise<Buffer> {
+		let exportStrategy = null;
+		if (method === 'weekly') {
+			exportStrategy = new WeeklyExportStrategy();
+		} else {
+			throw new Error('Invalid export method');
+		}
+
+		// get data from database.
+		const appointmentDbModels =
+			await this.appointmentRepository.getAppointmentsByDateRange(
+				startDate,
+				endDate
+			);
+
+		if (!appointmentDbModels) {
+			return Buffer.from([]);
+		}
+
+		const staffDbModels = await this.staffRepository.findAll();
+		const staffNameMap = this.buildStaffNameMap(staffDbModels);
+
+		const appointmentsData = this.mapAppointmentDbModelsToAppointmentsData(
+			appointmentDbModels,
+			staffNameMap
+		);
+
+		const exportHelper = new ExportHelper(exportStrategy!);
+		return await exportHelper.exportToExcel(appointmentsData, fileName);
 	}
 }

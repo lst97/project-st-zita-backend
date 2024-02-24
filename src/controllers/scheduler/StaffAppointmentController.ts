@@ -5,6 +5,7 @@ import { Service } from 'typedi';
 import { CreateShareLinkForm } from '../../models/forms/scheduler/CreateShareLinkForm';
 import ResponseService from '../../services/response/ResponseService';
 import ErrorHandlerService from '../../services/ErrorHandlerService';
+import { ExportAsExcelForm } from '../../models/forms/scheduler/ExportAsExcelForm';
 
 @Service()
 export class StaffAppointmentController {
@@ -167,6 +168,53 @@ export class StaffAppointmentController {
 			this.responseService.sendSuccess(
 				res,
 				appointments,
+				req.headers.requestId as string
+			);
+		} catch (error) {
+			if (error instanceof Error) {
+				this.errorHandlerService.handleUnknownError({
+					error: error,
+					service: StaffAppointmentController.name
+				});
+			}
+
+			this.responseService.sendError(
+				res,
+				error as Error,
+				req.headers.requestId as string
+			);
+		}
+	}
+
+	public async exportAppointmentsAsExcel(
+		req: Request,
+		res: Response
+	): Promise<void> {
+		const exportForm = req.body as ExportAsExcelForm;
+		const fileName = `${
+			exportForm.method
+		}_schedule_${exportForm.fromDate.substring(
+			0,
+			10
+		)}_${exportForm.toDate.substring(0, 10)}.xlsx`;
+
+		try {
+			const excelBuffer =
+				await this.appointmentService.getExportedAppointmentExcelBuffer(
+					exportForm.fromDate,
+					exportForm.toDate,
+					exportForm.method,
+					fileName
+				);
+
+			res.setHeader(
+				'Content-Type',
+				'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+			);
+
+			this.responseService.sendSuccess(
+				res,
+				{ fileName: fileName, buffer: excelBuffer.toString('base64') },
 				req.headers.requestId as string
 			);
 		} catch (error) {

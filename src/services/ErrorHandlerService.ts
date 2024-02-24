@@ -4,6 +4,7 @@ import DefinedBaseError, {
 	ClientAuthError,
 	ControllerError,
 	DatabaseError,
+	ExportError,
 	ServerError,
 	ServiceError,
 	ValidationError
@@ -115,6 +116,10 @@ class ErrorHandlerService {
 		this._handleError(serverError);
 	}
 
+	private handleExportError(error: ExportError): void {
+		this._handleError(error);
+	}
+
 	private handleControllerError(error: ControllerError): void {
 		this._handleError(error);
 	}
@@ -153,6 +158,8 @@ class ErrorHandlerService {
 			this.handleClientAuthError(error);
 		} else if (error instanceof ValidationError) {
 			this.handleValidationError(error);
+		} else if (error instanceof ExportError) {
+			this.handleExportError(error);
 		} else {
 			this._handleUnknownError(error);
 		}

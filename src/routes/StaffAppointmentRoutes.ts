@@ -56,4 +56,9 @@ router.get(
 	(req, res) => staffAppointmentController.getSharedAppointments(req, res)
 );
 
+router.post('/appointments/export/excel', verifyToken, (req, res) =>
+	// TODO: validation if the dates is a valid date (only 7 days is allowed to export)
+	staffAppointmentController.exportAppointmentsAsExcel(req, res)
+);
+
 export default router;

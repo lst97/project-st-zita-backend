@@ -149,9 +149,9 @@ class StaffAppointmentRepository implements IStaffAppointmentRepository {
 		await this.queryService.runWithSqlErrorHandlingAsync(
 			this.databaseService.getDatabase(),
 			`
-	  UPDATE StaffAppointments SET staffId = ?, weekViewId = ?, startDate = ?, endDate = ?, location = ?, modifyDate = ?
-	  WHERE id = ?
-	`,
+				UPDATE StaffAppointments SET staffId = ?, weekViewId = ?, startDate = ?, endDate = ?, location = ?, modifyDate = ?
+				WHERE id = ?
+			`,
 			[
 				appointment.staffId,
 				appointment.weekViewId,
@@ -199,6 +199,22 @@ class StaffAppointmentRepository implements IStaffAppointmentRepository {
 			[staffId, weekViewId],
 			SqlDeleteError
 		);
+	}
+
+	async getAppointmentsByDateRange(
+		startDate: string,
+		endDate: string
+	): Promise<StaffAppointmentDbModel[]> {
+		return (await this.queryService.allWithSqlErrorHandlingAsync(
+			this.databaseService.getDatabase(),
+			`
+				SELECT * FROM StaffAppointments
+				WHERE startDate >= ? 
+				AND endDate <= ? 
+			`,
+			[startDate, endDate],
+			SqlReadError
+		)) as StaffAppointmentDbModel[];
 	}
 }
 export default StaffAppointmentRepository;
