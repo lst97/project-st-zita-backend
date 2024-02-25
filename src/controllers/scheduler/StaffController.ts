@@ -1,35 +1,85 @@
 import { Request, Response } from 'express';
 import StaffService from '../../services/scheduler/StaffService';
 import { CreateStaffForm } from '../../models/forms/scheduler/CreateStaffForm';
-import { StaffAppointmentService as AppointmentService } from '../../services/scheduler/StaffAppointmentService';
 import { Service } from 'typedi';
+import ErrorHandlerService from '../../services/ErrorHandlerService';
+import DefinedBaseError, { ControllerError } from '../../models/error/Errors';
+import ResponseService from '../../services/response/ResponseService';
 
 @Service()
 class StaffController {
 	constructor(
 		private staffService: StaffService,
-		private appointmentService: AppointmentService
+		private errorHandlerService: ErrorHandlerService,
+		private responseService: ResponseService
 	) {}
 
 	public async createStaff(req: Request, res: Response): Promise<void> {
 		const createStaffForm = req.body as CreateStaffForm;
+		try {
+			const staffDbModel = await this.staffService.create(
+				createStaffForm
+			);
+			this.responseService.sendSuccess(
+				res,
+				staffDbModel,
+				req.headers.requestId as string
+			);
+		} catch (error) {
+			if (!(error instanceof DefinedBaseError)) {
+				this.errorHandlerService.handleUnknownControllerError({
+					error: error as Error,
+					service: StaffController.name,
+					errorType: ControllerError
+				});
+			}
 
-		const staff = await this.staffService.create(createStaffForm);
-		res.json({ data: staff });
+			this.responseService.sendError(res, error as Error, req.id);
+		}
 	}
 
 	public async deleteStaff(req: Request, res: Response): Promise<void> {
-		const staffName = req.query.staffName as string;
-		await this.appointmentService.deleteAllAppointmentsByStaffName(
-			staffName
-		);
-		await this.staffService.deleteByName(staffName);
-		res.json({ data: true });
+		try {
+			const staffName = req.query.staffName as string;
+
+			await this.staffService.deleteByName(staffName);
+			this.responseService.sendSuccess(
+				res,
+				true,
+				req.headers.requestId as string
+			);
+		} catch (error) {
+			if (!(error instanceof DefinedBaseError)) {
+				this.errorHandlerService.handleUnknownControllerError({
+					error: error as Error,
+					service: StaffController.name,
+					errorType: ControllerError
+				});
+			}
+
+			this.responseService.sendError(res, error as Error, req.id);
+		}
 	}
 
-	public async getAllStaffData(_req: Request, res: Response): Promise<void> {
-		const staffs = await this.staffService.getAll();
-		res.json({ data: staffs });
+	public async getAllStaffData(req: Request, res: Response): Promise<void> {
+		try {
+			const staffs = await this.staffService.getAll();
+			this.responseService.sendSuccess(
+				res,
+				staffs,
+				req.headers.requestId as string
+			);
+		} catch (error) {
+			if (!(error instanceof DefinedBaseError)) {
+				this.errorHandlerService.handleUnknownControllerError({
+					error: error as Error,
+					service: StaffController.name,
+					errorType: ControllerError
+				});
+			}
+
+			this.responseService.sendError(res, error as Error, req.id);
+		}
 	}
 }
 

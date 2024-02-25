@@ -1,7 +1,7 @@
 {
 	"compilerOptions": {
-		"target": "es6",
-		"module": "commonjs",
+		"target": "es2022",
+		"module": "umd",
 		"moduleResolution": "node",
 		"outDir": "./dist",
 		"rootDir": "./src",
@@ -11,6 +11,6 @@
 		"emitDecoratorMetadata": true
 	},
 	"include": ["src/**/*"],
-	"exclude": ["node_modules", "**/*.spec.ts"],
+	"exclude": ["node_modules", "**/*.spec.ts", "dist"],
 	"files": ["src/models/express/@types/index.d.ts"]
 }

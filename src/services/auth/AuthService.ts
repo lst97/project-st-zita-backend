@@ -5,30 +5,64 @@ import { hashPassword, verifyPassword } from '../../utils/HashHelper';
 import jwt from 'jsonwebtoken';
 import { RegistrationForm } from '../../models/forms/auth/RegistrationForm';
 import UserDbModel from '../../models/database/User';
-import { JwtPayload } from '../../models/auth/JwtPayload';
+import ErrorHandlerService from '../ErrorHandlerService';
+import {
+	AuthInvalidEmailError,
+	AuthInvalidPasswordError,
+	AuthRegistrationFailWithDuplicatedEmailError,
+	ServerInvalidEnvConfigError
+} from '../../models/error/Errors';
+import { Request } from 'express';
 
 @Service()
 class AuthService {
-	constructor(private userRepository: UserRepository) {}
+	constructor(
+		private userRepository: UserRepository,
+		private errorHandlerService: ErrorHandlerService
+	) {}
 
-	public async signin(form: SignInForm): Promise<string | null> {
+	public async signin(form: SignInForm, req: Request): Promise<string> {
 		const userDbModel = await this.userRepository.findByEmail(form.email);
+
 		if (!userDbModel) {
-			return null;
+			const autError = new AuthInvalidEmailError({ request: req });
+
+			this.errorHandlerService.handleError({
+				error: autError,
+				service: AuthService.name
+			});
+
+			throw autError;
 		}
 
 		if (
 			(await verifyPassword(form.password, userDbModel.passwordHash)) ==
 			false
 		) {
-			return null;
+			const authError = new AuthInvalidPasswordError({
+				request: req
+			});
+
+			this.errorHandlerService.handleError({
+				error: authError,
+				service: AuthService.name
+			});
+
+			throw authError;
 		}
 
 		const role = 'NOT_IMPLEMENTED';
 		const permission = 'NOT_IMPLEMENTED';
 		const secret = process.env.ACCESS_TOKEN_SECRET;
 		if (!secret) {
-			throw new Error('ACCESS_TOKEN_SECRET is not set in .env file.');
+			const error = new ServerInvalidEnvConfigError({
+				message: 'ACCESS_TOKEN_SECRET is not set in .env file.'
+			});
+			this.errorHandlerService.handleError({
+				error: error,
+				service: AuthService.name
+			});
+			throw error;
 		}
 
 		const accessToken = jwt.sign(
@@ -48,11 +82,22 @@ class AuthService {
 		return accessToken;
 	}
 
-	public async register(form: RegistrationForm): Promise<UserDbModel | null> {
+	public async register(
+		form: RegistrationForm,
+		req: Request
+	): Promise<UserDbModel> {
 		const userDbModel = await this.userRepository.findByEmail(form.email);
 		if (userDbModel) {
-			// User already exists
-			return null;
+			const autError = new AuthRegistrationFailWithDuplicatedEmailError(
+				{}
+			);
+
+			this.errorHandlerService.handleError({
+				error: autError,
+				service: AuthService.name
+			});
+
+			throw autError;
 		}
 
 		const passwordHash = await hashPassword(form.password);

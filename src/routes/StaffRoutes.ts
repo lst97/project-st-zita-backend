@@ -2,6 +2,11 @@ import express from 'express';
 import StaffController from '../controllers/scheduler/StaffController';
 import { Container } from 'typedi';
 import { verifyToken } from '../middleware/request/JwtMiddleware';
+import {
+	RequestBodyValidationStrategy,
+	requestValidator
+} from '../middleware/request/RequestValidationMiddleware';
+import { StaffSchema } from '../schemas/StaffSchema';
 
 // TODO: add asyncHandler middleware (sprint 2)
 /// Example
@@ -19,16 +24,24 @@ import { verifyToken } from '../middleware/request/JwtMiddleware';
 
 const router = express.Router();
 
-const staffController = Container.get(StaffController);
-
-router.post('/staffs', verifyToken, (req, res) =>
-	staffController.createStaff(req, res)
+router.post(
+	'/staffs',
+	verifyToken,
+	requestValidator(
+		new RequestBodyValidationStrategy(StaffSchema.createFormSchema)
+	),
+	(req, res) => {
+		const staffController = Container.get(StaffController);
+		staffController.createStaff(req, res);
+	}
 );
-router.delete('/staffs', verifyToken, (req, res) =>
-	staffController.deleteStaff(req, res)
-);
-router.get('/staffs', verifyToken, (req, res) =>
-	staffController.getAllStaffData(req, res)
-);
+router.delete('/staffs', verifyToken, (req, res) => {
+	const staffController = Container.get(StaffController);
+	staffController.deleteStaff(req, res);
+});
+router.get('/staffs', verifyToken, (req, res) => {
+	const staffController = Container.get(StaffController);
+	staffController.getAllStaffData(req, res);
+});
 
 export default router;

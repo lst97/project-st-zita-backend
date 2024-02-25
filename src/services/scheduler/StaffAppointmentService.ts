@@ -1,4 +1,3 @@
-import StaffService from './StaffService';
 import StaffAppointmentDbModel from '../../models/database/StaffAppointment';
 import { v4 as uuidv4 } from 'uuid';
 import StaffAppointmentRepository from '../../repositories/scheduler/StaffAppointmentRepository';
@@ -7,24 +6,43 @@ import { Service } from 'typedi';
 import SharedAppointmentLinkRepository from '../../repositories/scheduler/SharedAppointmentLinkRepository';
 import SharedAppointmentLinkDbModel from '../../models/database/SharedLink';
 import { Permission } from '../../utils/PermissionHelper';
+import StaffRepository from '../../repositories/scheduler/StaffRepository';
+import {
+	PartialError,
+	SqlRecordNotFoundError
+} from '../../models/error/Errors';
+import StaffDbModel from '../../models/database/Staff';
+import ErrorHandlerService from '../ErrorHandlerService';
+import { ExportHelper, WeeklyExportStrategy } from '../../utils/ExportHelper';
 
 @Service()
 export class StaffAppointmentService {
 	constructor(
-		private staffService: StaffService,
+		private staffRepository: StaffRepository,
 		private appointmentRepository: StaffAppointmentRepository,
-		private shareAppointmentLinkRepository: SharedAppointmentLinkRepository
+		private shareAppointmentLinkRepository: SharedAppointmentLinkRepository,
+		private errorHandlerService: ErrorHandlerService
 	) {}
 
+	/**
+	 * Creates appointments based on the provided data.
+	 *
+	 * @param appointmentsData - An array of appointment data.
+	 * @returns A promise that resolves to an array of created appointment data.
+	 * @throws {PartialError} If any of the appointments fail to be created due to non-existent staff.
+	 */
 	public async createAppointments(
 		appointmentsData: AppointmentData[]
 	): Promise<AppointmentData[]> {
 		// Can optimize this by using groupBy
-		const staffs = await this.staffService.getAll();
+		const staffs = await this.staffRepository.findAll();
 		const staffIdMap = staffs.reduce((map, staff) => {
 			map.set(staff.name, staff.id);
 			return map;
 		}, new Map<string, string>());
+
+		const unsuccessfulAppointments: AppointmentData[] = [];
+		const successfulAppointments: AppointmentData[] = [];
 
 		const appointmentsDbModels: StaffAppointmentDbModel[] = [];
 		appointmentsData.forEach((appointment) => {
@@ -41,11 +59,27 @@ export class StaffAppointmentService {
 				});
 
 				appointmentsDbModels.push(appointmentDbModel);
+				successfulAppointments.push(appointment);
+			} else {
+				unsuccessfulAppointments.push(appointment);
 			}
 		});
 
-		await this.appointmentRepository.createMany(appointmentsDbModels);
-		return appointmentsData;
+		if (appointmentsDbModels.length > 0) {
+			await this.appointmentRepository.createMany(appointmentsDbModels);
+		}
+
+		if (unsuccessfulAppointments.length > 0) {
+			const errorMessage: string[] = [];
+			for (const appointment of unsuccessfulAppointments) {
+				errorMessage.push(
+					`Staff with name ${appointment.staffName} does not exist`
+				);
+			}
+			throw new PartialError({ message: errorMessage.join('\n') });
+		}
+
+		return successfulAppointments;
 	}
 
 	private convertToAppointmentData(
@@ -62,8 +96,11 @@ export class StaffAppointmentService {
 		});
 	}
 
-	private async buildStaffNameMap(): Promise<Map<string, string>> {
-		const staffs = await this.staffService.getAll();
+	/**
+	 * Builds a map of staff IDs to staff names.
+	 * @returns A Promise that resolves to a Map object with staff IDs as keys and staff names as values.
+	 */
+	private buildStaffNameMap(staffs: StaffDbModel[]): Map<string, string> {
 		const staffNameMap = staffs.reduce((map, staff) => {
 			map.set(staff.id, staff.name);
 			return map;
@@ -89,9 +126,15 @@ export class StaffAppointmentService {
 		return appointments;
 	}
 
+	/**
+	 * Retrieves all appointments.
+	 * @returns A promise that resolves to an array of AppointmentData.
+	 * @throws {DatabaseError} If the query fails.
+	 */
 	public async getAllAppointments(): Promise<AppointmentData[]> {
 		const appointmentDbModels = await this.appointmentRepository.findAll();
-		const staffNameMap = await this.buildStaffNameMap();
+		const staffDbModels = await this.staffRepository.findAll();
+		const staffNameMap = this.buildStaffNameMap(staffDbModels);
 
 		return this.mapAppointmentDbModelsToAppointmentsData(
 			appointmentDbModels,
@@ -99,13 +142,20 @@ export class StaffAppointmentService {
 		);
 	}
 
+	/**
+	 * Retrieves all appointments by week view ID.
+	 *
+	 * @param weekViewId - The ID of the week view.
+	 * @returns A promise that resolves to an array of AppointmentData or null if no appointments are found.
+	 * @throws {DatabaseError} If the query fails.
+	 */
 	public async getAllAppointmentsByWeekViewId(
 		weekViewId: string
 	): Promise<AppointmentData[] | null> {
 		const appointmentDbModels =
 			await this.appointmentRepository.findByWeekViewId(weekViewId);
-
-		const staffNameMap = await this.buildStaffNameMap();
+		const staffDbModels = await this.staffRepository.findAll();
+		const staffNameMap = this.buildStaffNameMap(staffDbModels);
 
 		if (!appointmentDbModels) {
 			return null;
@@ -121,9 +171,18 @@ export class StaffAppointmentService {
 		staffName: string,
 		weekViewId: string
 	) {
-		const staffId = await this.staffService.getIdByName(staffName);
+		const staffId = (await this.staffRepository.findByName(staffName))?.id;
 		if (!staffId) {
-			return;
+			const sqlError = new SqlRecordNotFoundError({
+				message: `Staff with name ${staffName} does not exist`
+			});
+
+			this.errorHandlerService.handleError({
+				error: sqlError,
+				service: StaffAppointmentService.name
+			});
+
+			throw sqlError;
 		}
 
 		await this.appointmentRepository.deleteByWeekViewIdAndStaffId(
@@ -135,9 +194,18 @@ export class StaffAppointmentService {
 	public async deleteAllAppointmentsByStaffName(
 		staffName: string
 	): Promise<void> {
-		const staffId = await this.staffService.getIdByName(staffName);
+		const staffId = (await this.staffRepository.findByName(staffName))?.id;
 		if (!staffId) {
-			return;
+			const sqlError = new SqlRecordNotFoundError({
+				message: `Staff with name ${staffName} does not exist`
+			});
+
+			this.errorHandlerService.handleError({
+				error: sqlError,
+				service: StaffAppointmentService.name
+			});
+
+			throw sqlError;
 		}
 
 		const weekViewIds =
@@ -163,6 +231,7 @@ export class StaffAppointmentService {
 		expiry?: string,
 		weekViewIds?: string[]
 	): Promise<string> {
+		// TODO: not yet finished, basic basic function only
 		// user is only allowed to create one link id at the moment
 		const existingLinks =
 			await this.shareAppointmentLinkRepository.findAllByUserId(userId);
@@ -245,6 +314,7 @@ export class StaffAppointmentService {
 		linkId: string,
 		weekViewId: string
 	): Promise<AppointmentData[] | null> {
+		// TODO: not yet finished, basic function only
 		const linkDbModels =
 			await this.shareAppointmentLinkRepository.findAllById(linkId);
 
@@ -276,5 +346,41 @@ export class StaffAppointmentService {
 		} else {
 			return this.getAllAppointmentsByWeekViewId(weekViewId);
 		}
+	}
+
+	public async getExportedAppointmentExcelBuffer(
+		startDate: string,
+		endDate: string,
+		method: string,
+		fileName: string
+	): Promise<Buffer> {
+		let exportStrategy = null;
+		if (method === 'weekly') {
+			exportStrategy = new WeeklyExportStrategy();
+		} else {
+			throw new Error('Invalid export method');
+		}
+
+		// get data from database.
+		const appointmentDbModels =
+			await this.appointmentRepository.getAppointmentsByDateRange(
+				startDate,
+				endDate
+			);
+
+		if (!appointmentDbModels) {
+			return Buffer.from([]);
+		}
+
+		const staffDbModels = await this.staffRepository.findAll();
+		const staffNameMap = this.buildStaffNameMap(staffDbModels);
+
+		const appointmentsData = this.mapAppointmentDbModelsToAppointmentsData(
+			appointmentDbModels,
+			staffNameMap
+		);
+
+		const exportHelper = new ExportHelper(exportStrategy!);
+		return await exportHelper.exportToExcel(appointmentsData, fileName);
 	}
 }

@@ -8,6 +8,7 @@ import { API_ENDPOINT, PORT } from './constants/ServerConstants';
 import cors from 'cors';
 import fs from 'fs';
 import https from 'https';
+import { requestId } from './middleware/request/RequestIdMiddleware';
 
 const app = express();
 
@@ -40,6 +41,8 @@ app.use(express.json());
 app.use(`${API_ENDPOINT}`, staffRoutes);
 app.use(`${API_ENDPOINT}`, appointmentRoutes);
 app.use(`${API_ENDPOINT}`, authenticationRoutes);
+
+app.use(requestId);
 
 const httpsServer = https.createServer(credentials, app);
 

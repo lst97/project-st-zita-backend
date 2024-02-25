@@ -1,22 +1,34 @@
-import { DatabaseService } from '../../services/DatabaseService';
+import {
+	DatabaseService,
+	SQLite3QueryService
+} from '../../services/DatabaseService';
 import { Service } from 'typedi';
-import { allAsync, getAsync, runAsync } from '../../utils/SQLiteHelper';
 import IUserRepository from './interfaces/IUserRepository';
 import UserDbModel from '../../models/database/User';
+import {
+	SqlCreateError,
+	SqlDeleteError,
+	SqlReadError,
+	SqlUpdateError
+} from '../../models/error/Errors';
 
 @Service()
 class UserRepository implements IUserRepository {
-	constructor(private databaseService: DatabaseService) {}
+	constructor(
+		private databaseService: DatabaseService,
+		private queryService: SQLite3QueryService
+	) {}
 	async findByEmail(email: string): Promise<UserDbModel | null> {
-		return (await getAsync(
+		return (await this.queryService.getWithSqlErrorHandlingAsync(
 			this.databaseService.getDatabase(),
 			'SELECT * FROM Users WHERE email = ?',
-			[email]
+			[email],
+			SqlReadError
 		)) as UserDbModel | null;
 	}
 
 	async create(user: UserDbModel): Promise<UserDbModel> {
-		await runAsync(
+		await this.queryService.runWithSqlErrorHandlingAsync(
 			this.databaseService.getDatabase(),
 			'INSERT INTO Staffs (id, username, email, passwordHash, color, image, createDate, modifyDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
 			[
@@ -28,29 +40,32 @@ class UserRepository implements IUserRepository {
 				user.image,
 				user.createDate,
 				user.modifyDate
-			]
+			],
+			SqlCreateError
 		);
 		return user;
 	}
 
 	async findById(id: string): Promise<UserDbModel | null> {
-		return (await getAsync(
+		return (await this.queryService.getWithSqlErrorHandlingAsync(
 			this.databaseService.getDatabase(),
 			'SELECT * FROM Users WHERE id = ?',
-			[id]
+			[id],
+			SqlReadError
 		)) as UserDbModel | null;
 	}
 
 	async findAll(): Promise<UserDbModel[]> {
-		return (await allAsync(
+		return (await this.queryService.allWithSqlErrorHandlingAsync(
 			this.databaseService.getDatabase(),
 			'SELECT * FROM Users',
-			[]
+			[],
+			SqlReadError
 		)) as UserDbModel[];
 	}
 
 	async update(user: UserDbModel): Promise<UserDbModel> {
-		await runAsync(
+		await this.queryService.runWithSqlErrorHandlingAsync(
 			this.databaseService.getDatabase(),
 			'UPDATE Users SET username = ?, email = ?, passwordHash = ?, color = ?, image = ?, modifyDate = ? WHERE id = ?',
 			[
@@ -61,16 +76,18 @@ class UserRepository implements IUserRepository {
 				user.image,
 				user.modifyDate,
 				user.id
-			]
+			],
+			SqlUpdateError
 		);
 		return user;
 	}
 
 	async deleteById(id: string): Promise<void> {
-		await runAsync(
+		await this.queryService.runWithSqlErrorHandlingAsync(
 			this.databaseService.getDatabase(),
 			'DELETE FROM Users WHERE id = ?',
-			[id]
+			[id],
+			SqlDeleteError
 		);
 	}
 }

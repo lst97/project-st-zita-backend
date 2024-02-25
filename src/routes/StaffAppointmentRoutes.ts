@@ -2,6 +2,13 @@ import express from 'express';
 import { StaffAppointmentController } from '../controllers/scheduler/StaffAppointmentController';
 import { Container } from 'typedi';
 import { verifyToken } from '../middleware/request/JwtMiddleware';
+import {
+	RequestBodyValidationStrategy,
+	RequestParamValidationStrategy,
+	RequestQueryValidationStrategy,
+	requestValidator
+} from '../middleware/request/RequestValidationMiddleware';
+import { ShareAppointmentSchema } from '../schemas/ShareAppointmentSchema';
 
 const router = express.Router();
 
@@ -22,12 +29,36 @@ router.delete('/appointments/week_view/:id', verifyToken, (req, res) =>
 	)
 );
 
-router.post('/appointments/share', verifyToken, (req, res) =>
-	staffAppointmentController.createShareAppointments(req, res)
+router.post(
+	'/appointments/share',
+	verifyToken,
+	requestValidator(
+		new RequestBodyValidationStrategy(
+			ShareAppointmentSchema.createFormSchema
+		)
+	),
+	(req, res) => staffAppointmentController.createShareAppointments(req, res)
 );
 
-router.get('/shared_appointments/:id', (req, res) =>
-	staffAppointmentController.getSharedAppointments(req, res)
+// uuidv4&weekViewId=142024
+router.get(
+	'/shared_appointments/:id',
+	requestValidator(
+		new RequestParamValidationStrategy(
+			ShareAppointmentSchema.urlParamSchema
+		)
+	),
+	requestValidator(
+		new RequestQueryValidationStrategy(
+			ShareAppointmentSchema.urlQuerySchema
+		)
+	),
+	(req, res) => staffAppointmentController.getSharedAppointments(req, res)
+);
+
+router.post('/appointments/export/excel', verifyToken, (req, res) =>
+	// TODO: validation if the dates is a valid date (only 7 days is allowed to export)
+	staffAppointmentController.exportAppointmentsAsExcel(req, res)
 );
 
 export default router;
