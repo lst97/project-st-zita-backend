@@ -1,6 +1,9 @@
 import { Request, Response } from 'express';
 import StaffService from '../../services/scheduler/StaffService';
-import { CreateStaffForm } from '../../models/forms/scheduler/CreateStaffForm';
+import {
+	CreateStaffForm,
+	UpdateStaffForm
+} from '../../models/forms/scheduler/StaffForms';
 import { Service } from 'typedi';
 import ErrorHandlerService from '../../services/ErrorHandlerService';
 import DefinedBaseError, { ControllerError } from '../../models/error/Errors';
@@ -46,6 +49,30 @@ class StaffController {
 			this.responseService.sendSuccess(
 				res,
 				true,
+				req.headers.requestId as string
+			);
+		} catch (error) {
+			if (!(error instanceof DefinedBaseError)) {
+				this.errorHandlerService.handleUnknownControllerError({
+					error: error as Error,
+					service: StaffController.name,
+					errorType: ControllerError
+				});
+			}
+
+			this.responseService.sendError(res, error as Error, req.id);
+		}
+	}
+
+	public async editStaff(req: Request, res: Response): Promise<void> {
+		try {
+			const staffForm = req.body as UpdateStaffForm;
+
+			const updatedStaff = await this.staffService.updateStaff(staffForm);
+
+			this.responseService.sendSuccess(
+				res,
+				updatedStaff,
 				req.headers.requestId as string
 			);
 		} catch (error) {

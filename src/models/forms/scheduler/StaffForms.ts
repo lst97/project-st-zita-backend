@@ -21,3 +21,21 @@ export class CreateStaffForm {
 		this.phoneNumber = params.phoneNumber;
 	}
 }
+
+export class UpdateStaffForm {
+	id: string;
+	staffName: string;
+	image?: string;
+	color: string;
+	email?: string;
+	phoneNumber?: string;
+
+	constructor(params: CreateStaffFormParams) {
+		this.id = params.staffName;
+		this.staffName = params.staffName;
+		this.image = params.image;
+		this.color = params.color;
+		this.email = params.email;
+		this.phoneNumber = params.phoneNumber;
+	}
+}

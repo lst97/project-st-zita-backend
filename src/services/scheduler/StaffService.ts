@@ -1,4 +1,7 @@
-import { CreateStaffForm } from '../../models/forms/scheduler/CreateStaffForm';
+import {
+	CreateStaffForm,
+	UpdateStaffForm
+} from '../../models/forms/scheduler/StaffForms';
 import StaffDbModel from '../../models/database/Staff';
 import StaffRepository from '../../repositories/scheduler/StaffRepository';
 import StaffDataSharedModel from '../../models/share/scheduler/StaffData';
@@ -89,16 +92,19 @@ class StaffService {
 		}
 	}
 
+	public async updateStaff(staff: UpdateStaffForm): Promise<StaffDbModel>;
 	/**
 	 * Updates a staff member in the database.
-	 * @param staff - The staff member to update.
+	 * If the provided staff parameter is an instance of UpdateStaffForm, it searches for the staff member by name and updates their information.
+	 * If the staff member is not found, a SqlRecordNotFoundError is thrown.
+	 * If the provided staff parameter is an instance of StaffDbModel, it directly updates the staff member's information.
+	 *
+	 * @param staff - The staff member to update. Can be an instance of UpdateStaffForm or StaffDbModel.
 	 * @returns The updated staff member.
-	 * @throws {SqlRecordNotFoundError} If the staff member with the given ID is not found.
+	 * @throws {SqlRecordNotFoundError} If the staff member is not found in the database.
 	 */
-	public async updateStaff(staff: StaffDbModel): Promise<StaffDbModel> {
-		const staffDbModel = await this.staffRepository.findById(staff.id);
-
-		if (staffDbModel === null) {
+	public async updateStaff(staff: UpdateStaffForm): Promise<StaffDbModel> {
+		if (!(await this.staffRepository.findById(staff.id))) {
 			const sqlError = new SqlRecordNotFoundError({
 				message: `Staff id "${staff.id}" not found`
 			});
@@ -111,7 +117,17 @@ class StaffService {
 			throw sqlError;
 		}
 
-		return await this.staffRepository.update(staff);
+		const staffDbModel = new StaffDbModel({
+			id: staff.id,
+			name: staff.staffName,
+			email: staff.email,
+			phoneNumber: staff.phoneNumber,
+			image: staff.image,
+			color: staff.color
+		});
+
+		await this.staffRepository.update(staffDbModel);
+		return staffDbModel;
 	}
 
 	/**
