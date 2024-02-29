@@ -2,7 +2,8 @@ import { v4 as uuidv4 } from 'uuid';
 
 interface UserDbModelParams {
 	id?: string;
-	username: string;
+	firstName: string;
+	lastName: string;
 	email: string;
 	passwordHash: string;
 	color: string;
@@ -13,7 +14,8 @@ interface UserDbModelParams {
 
 class UserDbModel {
 	id?: string;
-	username: string;
+	firstName: string;
+	lastName: string;
 	email: string;
 	passwordHash: string;
 	color: string;
@@ -23,7 +25,8 @@ class UserDbModel {
 
 	constructor({
 		id = uuidv4(), // Default value if not provided
-		username,
+		firstName,
+		lastName,
 		email,
 		passwordHash,
 		color,
@@ -32,7 +35,8 @@ class UserDbModel {
 		modifyDate = new Date().toISOString()
 	}: UserDbModelParams) {
 		this.id = id;
-		this.username = username;
+		this.firstName = firstName;
+		this.lastName = lastName;
 		this.email = email;
 		this.passwordHash = passwordHash;
 		this.color = color;

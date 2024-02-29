@@ -24,11 +24,14 @@ class StaffAppointmentRepository implements IStaffAppointmentRepository {
 	 * @returns A promise that resolves to the found staff appointment or null if not found.
 	 * @throws {SqlReadError} If the query fails.
 	 */
-	async findById(id: string): Promise<StaffAppointmentDbModel | null> {
+	async findById(
+		id: string,
+		userId: string
+	): Promise<StaffAppointmentDbModel | null> {
 		return (await this.queryService.getWithSqlErrorHandlingAsync(
 			this.databaseService.getDatabase(),
-			'SELECT * FROM StaffAppointments WHERE id = ?',
-			[id],
+			'SELECT * FROM StaffAppointments WHERE id = ? AND userId = ?',
+			[id, userId],
 			SqlReadError
 		)) as StaffAppointmentDbModel | null;
 	}
@@ -40,16 +43,18 @@ class StaffAppointmentRepository implements IStaffAppointmentRepository {
 	 * @throws {SqlCreateError} If the query fails.
 	 */
 	async create(
-		appointment: StaffAppointmentDbModel
+		appointment: StaffAppointmentDbModel,
+		userId: string
 	): Promise<StaffAppointmentDbModel> {
 		await this.queryService.runWithSqlErrorHandlingAsync(
 			this.databaseService.getDatabase(),
 			`
-		  INSERT INTO StaffAppointments (id, staffId, weekViewId, startDate, endDate, location)
-		  VALUES (?, ?, ?, ?, ?, ?)
+			INSERT INTO StaffAppointments (id, userId, staffId, weekViewId, startDate, endDate, location)
+			VALUES (?, ?, ?, ?, ?, ?, ?)
 		`,
 			[
 				appointment.id,
+				userId,
 				appointment.staffId,
 				appointment.weekViewId,
 				appointment.startDate,
@@ -68,16 +73,18 @@ class StaffAppointmentRepository implements IStaffAppointmentRepository {
 	 * @throws {SqlCreateError} If the query fails.
 	 */
 	async createMany(
-		appointments: StaffAppointmentDbModel[]
+		appointments: StaffAppointmentDbModel[],
+		userId: string
 	): Promise<StaffAppointmentDbModel[]> {
 		await this.queryService.runWithSqlErrorHandlingAsync(
 			this.databaseService.getDatabase(),
 			`
-		  INSERT INTO StaffAppointments (id, staffId, weekViewId, startDate, endDate, location)
-		  VALUES ${appointments.map(() => '(?, ?, ?, ?, ?, ?)').join(', ')}
+			INSERT INTO StaffAppointments (id, userId, staffId, weekViewId, startDate, endDate, location)
+			VALUES ${appointments.map(() => '(?, ?, ?, ?, ?, ?, ?)').join(', ')}
 		`,
 			appointments.flatMap((appointment) => [
 				appointment.id,
+				userId,
 				appointment.staffId,
 				appointment.weekViewId,
 				appointment.startDate,
@@ -95,14 +102,17 @@ class StaffAppointmentRepository implements IStaffAppointmentRepository {
 	 * @returns A promise that resolves to the found staff appointments.
 	 * @throws {SqlReadError} If the query fails.
 	 */
-	async getAllWeekViewIdsByStaffId(staffId: string): Promise<string[]> {
+	async getAllWeekViewIdsByStaffId(
+		staffId: string,
+		userId: string
+	): Promise<string[]> {
 		return (
 			(await this.queryService.allWithSqlErrorHandlingAsync(
 				this.databaseService.getDatabase(),
 				`
-		SELECT weekViewId FROM StaffAppointments WHERE staffId = ?
-	  `,
-				[staffId],
+		SELECT weekViewId FROM StaffAppointments WHERE staffId = ? AND userId = ?
+		`,
+				[staffId, userId],
 				SqlReadError
 			)) as StaffAppointmentDbModel[]
 		).map((row) => row.weekViewId);
@@ -114,11 +124,14 @@ class StaffAppointmentRepository implements IStaffAppointmentRepository {
 	 * @returns A promise that resolves to the found staff appointments.
 	 * @throws {SqlReadError} If the query fails.
 	 */
-	async findByWeekViewId(id: string): Promise<StaffAppointmentDbModel[]> {
+	async findByWeekViewId(
+		id: string,
+		userId: string
+	): Promise<StaffAppointmentDbModel[]> {
 		return (await this.queryService.allWithSqlErrorHandlingAsync(
 			this.databaseService.getDatabase(),
-			'SELECT * FROM StaffAppointments WHERE weekViewId = ?',
-			[id],
+			'SELECT * FROM StaffAppointments WHERE weekViewId = ? AND userId = ?',
+			[id, userId],
 			SqlReadError
 		)) as StaffAppointmentDbModel[];
 	}
@@ -128,11 +141,11 @@ class StaffAppointmentRepository implements IStaffAppointmentRepository {
 	 * @returns A promise that resolves to an array of all staff appointments.
 	 * @throws {SqlReadError} If the query fails.
 	 */
-	async findAll(): Promise<StaffAppointmentDbModel[]> {
+	async findAll(userId: string): Promise<StaffAppointmentDbModel[]> {
 		return (await this.queryService.allWithSqlErrorHandlingAsync(
 			this.databaseService.getDatabase(),
-			'SELECT * FROM StaffAppointments',
-			[],
+			'SELECT * FROM StaffAppointments WHERE userId = ?',
+			[userId],
 			SqlReadError
 		)) as StaffAppointmentDbModel[];
 	}
@@ -144,13 +157,14 @@ class StaffAppointmentRepository implements IStaffAppointmentRepository {
 	 * @throws {SqlUpdateError} If the query fails.
 	 */
 	async update(
-		appointment: StaffAppointmentDbModel
+		appointment: StaffAppointmentDbModel,
+		userId: string
 	): Promise<StaffAppointmentDbModel> {
 		await this.queryService.runWithSqlErrorHandlingAsync(
 			this.databaseService.getDatabase(),
 			`
 				UPDATE StaffAppointments SET staffId = ?, weekViewId = ?, startDate = ?, endDate = ?, location = ?, modifyDate = ?
-				WHERE id = ?
+				WHERE id = ? AND userId = ?
 			`,
 			[
 				appointment.staffId,
@@ -159,7 +173,8 @@ class StaffAppointmentRepository implements IStaffAppointmentRepository {
 				appointment.endDate,
 				appointment.location,
 				new Date().toISOString(),
-				appointment.id
+				appointment.id,
+				userId
 			],
 			SqlUpdateError
 		);
@@ -172,11 +187,11 @@ class StaffAppointmentRepository implements IStaffAppointmentRepository {
 	 * @returns A promise that resolves when the deletion is complete.
 	 * @throws {SqlDeleteError} If the query fails.
 	 */
-	async deleteById(id: string): Promise<void> {
+	async deleteById(id: string, userId: string): Promise<void> {
 		await this.queryService.runWithSqlErrorHandlingAsync(
 			this.databaseService.getDatabase(),
-			'DELETE FROM StaffAppointments WHERE id = ?',
-			[id],
+			'DELETE FROM StaffAppointments WHERE id = ? AND userId = ?',
+			[id, userId],
 			SqlDeleteError
 		);
 	}
@@ -191,19 +206,21 @@ class StaffAppointmentRepository implements IStaffAppointmentRepository {
 	 */
 	async deleteByWeekViewIdAndStaffId(
 		staffId: string,
-		weekViewId: string
+		weekViewId: string,
+		userId: string
 	): Promise<void> {
 		await this.queryService.runWithSqlErrorHandlingAsync(
 			this.databaseService.getDatabase(),
-			'DELETE FROM StaffAppointments WHERE staffId = ? AND weekViewId = ?',
-			[staffId, weekViewId],
+			'DELETE FROM StaffAppointments WHERE staffId = ? AND weekViewId = ? AND userId = ?',
+			[staffId, weekViewId, userId],
 			SqlDeleteError
 		);
 	}
 
 	async getAppointmentsByDateRange(
 		startDate: string,
-		endDate: string
+		endDate: string,
+		userId: string
 	): Promise<StaffAppointmentDbModel[]> {
 		return (await this.queryService.allWithSqlErrorHandlingAsync(
 			this.databaseService.getDatabase(),
@@ -211,8 +228,9 @@ class StaffAppointmentRepository implements IStaffAppointmentRepository {
 				SELECT * FROM StaffAppointments
 				WHERE startDate >= ? 
 				AND endDate <= ? 
+				AND userId = ?
 			`,
-			[startDate, endDate],
+			[startDate, endDate, userId],
 			SqlReadError
 		)) as StaffAppointmentDbModel[];
 	}

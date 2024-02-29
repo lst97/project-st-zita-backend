@@ -43,5 +43,16 @@ router.get('/staffs', verifyToken, (req, res) => {
 	const staffController = Container.get(StaffController);
 	staffController.getAllStaffData(req, res);
 });
+router.put(
+	'/staffs/edit',
+	verifyToken,
+	requestValidator(
+		new RequestBodyValidationStrategy(StaffSchema.updateFormSchema)
+	),
+	(req, res) => {
+		const staffController = Container.get(StaffController);
+		staffController.editStaff(req, res);
+	}
+);
 
 export default router;

@@ -68,7 +68,8 @@ class AuthService {
 		const accessToken = jwt.sign(
 			{
 				id: userDbModel.id!,
-				username: userDbModel.username,
+				firstName: userDbModel.firstName,
+				lastName: userDbModel.lastName,
 				email: userDbModel.email,
 				role,
 				permission
@@ -88,9 +89,9 @@ class AuthService {
 	): Promise<UserDbModel> {
 		const userDbModel = await this.userRepository.findByEmail(form.email);
 		if (userDbModel) {
-			const autError = new AuthRegistrationFailWithDuplicatedEmailError(
-				{}
-			);
+			const autError = new AuthRegistrationFailWithDuplicatedEmailError({
+				request: req
+			});
 
 			this.errorHandlerService.handleError({
 				error: autError,
@@ -106,7 +107,8 @@ class AuthService {
 			new UserDbModel({
 				email: form.email,
 				passwordHash: passwordHash,
-				username: form.username,
+				firstName: form.firstName,
+				lastName: form.lastName,
 				color: form.color,
 				image: form.image
 			})

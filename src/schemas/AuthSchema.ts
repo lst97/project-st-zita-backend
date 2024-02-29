@@ -10,7 +10,8 @@ export class AuthSchema implements IBaseSchema {
 	});
 
 	static registrationFormSchema = Joi.object({
-		username: Joi.string().min(3).max(64).required(),
+		firstName: Joi.string().min(2).max(64).required(),
+		lastName: Joi.string().min(2).max(64).required(),
 		email: Joi.string().email().required(),
 		password: Joi.string().min(8).required(),
 		color: Joi.string()

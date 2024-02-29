@@ -3,6 +3,9 @@ import { IBaseSchema } from './IBaseSchema';
 
 export class StaffSchema implements IBaseSchema {
 	static createFormSchema = Joi.object({
+		id: Joi.string()
+			.guid({ version: ['uuidv4'] })
+			.optional(),
 		staffName: Joi.string().max(64).required(),
 		image: Joi.alternatives()
 			.try(Joi.string().base64(), Joi.string().uri())
@@ -15,6 +18,8 @@ export class StaffSchema implements IBaseSchema {
 			.pattern(/^(\+\d{1,3})?\d{10,15}$/) // +1234567890123 or 1234567890123
 			.optional()
 	});
+
+	static updateFormSchema = StaffSchema.createFormSchema;
 
 	static urlParamSchema = Joi.object({});
 

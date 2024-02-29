@@ -6,6 +6,7 @@ import { SignInForm } from '../../models/forms/auth/SignInForm';
 import AuthService from '../../services/auth/AuthService';
 import { RegistrationForm } from '../../models/forms/auth/RegistrationForm';
 import ResponseService from '../../services/response/ResponseService';
+
 dotenv.config();
 
 @Service()
@@ -35,22 +36,24 @@ class AuthenticateController {
 
 	public async register(req: Request, res: Response): Promise<void> {
 		const registrationForm = req.body as RegistrationForm;
-		const userDbModel = await this.authService.register(
-			registrationForm,
-			req
-		);
-		if (!userDbModel) {
-			res.status(401).send('User already exists.');
-			return;
-		}
 
-		res.json({
-			data: {
-				id: userDbModel.id,
-				username: userDbModel.username,
-				email: userDbModel.email
-			}
-		});
+		try {
+			const userDbModel = await this.authService.register(
+				registrationForm,
+				req
+			);
+			this.responseService.sendSuccess(
+				res,
+				userDbModel,
+				req.headers.requestId as string
+			);
+		} catch (error) {
+			this.responseService.sendError(
+				res,
+				error as Error,
+				req.headers.requestId as string
+			);
+		}
 	}
 }
 
