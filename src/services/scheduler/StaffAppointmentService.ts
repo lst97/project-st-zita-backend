@@ -333,8 +333,7 @@ export class StaffAppointmentService {
 
 	public async getSharedAppointments(
 		linkId: string,
-		weekViewId: string,
-		userId: string
+		weekViewId: string
 	): Promise<AppointmentData[] | null> {
 		// TODO: not yet finished, basic function only
 		const linkDbModels =
@@ -360,13 +359,19 @@ export class StaffAppointmentService {
 
 		if (allowedWeekViewIds.length === 1 && allowedWeekViewIds[0] === null) {
 			// Allowed to view all appointments
-			return this.getAllAppointmentsByWeekViewId(weekViewId, userId);
+			return this.getAllAppointmentsByWeekViewId(
+				weekViewId,
+				linkDbModels[0].userId
+			);
 		}
 
 		if (!allowedWeekViewIds.includes(weekViewId)) {
 			return null;
 		} else {
-			return this.getAllAppointmentsByWeekViewId(weekViewId, userId);
+			return this.getAllAppointmentsByWeekViewId(
+				weekViewId,
+				linkDbModels[0].userId
+			);
 		}
 	}
 

@@ -160,8 +160,7 @@ export class StaffAppointmentController {
 			const appointments =
 				await this.appointmentService.getSharedAppointments(
 					linkId,
-					weekViewId,
-					req.user.id
+					weekViewId
 				);
 			this.responseService.sendSuccess(
 				res,
