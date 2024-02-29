@@ -38,11 +38,11 @@ app.use(cors());
 
 app.use(express.json());
 
+app.use(requestId);
+
 app.use(`${API_ENDPOINT}`, staffRoutes);
 app.use(`${API_ENDPOINT}`, appointmentRoutes);
 app.use(`${API_ENDPOINT}`, authenticationRoutes);
-
-app.use(requestId);
 
 const httpsServer = https.createServer(credentials, app);
 
