@@ -30,10 +30,11 @@ class UserRepository implements IUserRepository {
 	async create(user: UserDbModel): Promise<UserDbModel> {
 		await this.queryService.runWithSqlErrorHandlingAsync(
 			this.databaseService.getDatabase(),
-			'INSERT INTO Staffs (id, username, email, passwordHash, color, image, createDate, modifyDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+			'INSERT INTO Users (id, firstName, lastName, email, passwordHash, color, image, createDate, modifyDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
 			[
 				user.id,
-				user.username,
+				user.firstName,
+				user.lastName,
 				user.email,
 				user.passwordHash,
 				user.color,
@@ -67,9 +68,10 @@ class UserRepository implements IUserRepository {
 	async update(user: UserDbModel): Promise<UserDbModel> {
 		await this.queryService.runWithSqlErrorHandlingAsync(
 			this.databaseService.getDatabase(),
-			'UPDATE Users SET username = ?, email = ?, passwordHash = ?, color = ?, image = ?, modifyDate = ? WHERE id = ?',
+			'UPDATE Users SET firstName = ?, lastName = ?, email = ?, passwordHash = ?, color = ?, image = ?, modifyDate = ? WHERE id = ?',
 			[
-				user.username,
+				user.firstName,
+				user.lastName,
 				user.email,
 				user.passwordHash,
 				user.color,
