@@ -27,12 +27,18 @@ class StaffService {
 	 * Creates a new staff member.
 	 *
 	 * @param staffForm - The form data for creating a staff member.
+	 * @param userId - The ID of the user to create the staff member for.
 	 * @returns A promise that resolves to the created staff member.
 	 * @throws {SqlRecordExistsError} If a staff member with the same name already exists.
 	 * @throws {DatabaseError} If an unknown database error occurs.
 	 */
-	public async create(staffForm: CreateStaffForm): Promise<StaffDbModel> {
-		if (await this.staffRepository.findByName(staffForm.staffName)) {
+	public async create(
+		staffForm: CreateStaffForm,
+		userId: string
+	): Promise<StaffDbModel> {
+		if (
+			await this.staffRepository.findByName(staffForm.staffName, userId)
+		) {
 			const sqlError = new SqlRecordExistsError({
 				message: `Staff name "${staffForm.staffName}" already exists`
 			});
@@ -52,20 +58,24 @@ class StaffService {
 			image: staffForm.image,
 			color: staffForm.color
 		});
-		await this.staffRepository.create(staff);
+		await this.staffRepository.create(staff, userId);
 		return staff;
 	}
 
 	/**
 	 * Deletes a staff member by their name.
 	 * @param name - The name of the staff member to delete.
+	 * @param userId - The ID of the user to delete the staff member for.
 	 * @returns A Promise that resolves when the staff member is successfully deleted.
 	 * @throws {SqlRecordNotFoundError} If the staff member with the given name is not found.
 	 */
-	public async deleteByName(name: string): Promise<void> {
+	public async deleteByName(name: string, userId: string): Promise<void> {
 		let db = null;
 		try {
-			const staffDbModel = await this.staffRepository.findByName(name);
+			const staffDbModel = await this.staffRepository.findByName(
+				name,
+				userId
+			);
 			if (staffDbModel === null) {
 				const sqlError = new SqlRecordNotFoundError({
 					message: `Staff name "${name}" not found`
@@ -81,9 +91,10 @@ class StaffService {
 
 			db = await this.dbQueryService.beginTransactionAsync();
 			await this.appointmentService.deleteAllAppointmentsByStaffName(
-				name
+				name,
+				userId
 			);
-			await this.staffRepository.deleteByName(name);
+			await this.staffRepository.deleteByName(name, userId);
 			await this.dbQueryService.commitTransactionAsync(db);
 		} catch (error) {
 			if (db) {
@@ -92,7 +103,10 @@ class StaffService {
 		}
 	}
 
-	public async updateStaff(staff: UpdateStaffForm): Promise<StaffDbModel>;
+	public async updateStaff(
+		staff: UpdateStaffForm,
+		userId: string
+	): Promise<StaffDbModel>;
 	/**
 	 * Updates a staff member in the database.
 	 * If the provided staff parameter is an instance of UpdateStaffForm, it searches for the staff member by name and updates their information.
@@ -100,11 +114,15 @@ class StaffService {
 	 * If the provided staff parameter is an instance of StaffDbModel, it directly updates the staff member's information.
 	 *
 	 * @param staff - The staff member to update. Can be an instance of UpdateStaffForm or StaffDbModel.
+	 * @param userId - The ID of the user to update the staff member for.
 	 * @returns The updated staff member.
 	 * @throws {SqlRecordNotFoundError} If the staff member is not found in the database.
 	 */
-	public async updateStaff(staff: UpdateStaffForm): Promise<StaffDbModel> {
-		if (!(await this.staffRepository.findById(staff.id))) {
+	public async updateStaff(
+		staff: UpdateStaffForm,
+		userId: string
+	): Promise<StaffDbModel> {
+		if (!(await this.staffRepository.findById(staff.id, userId))) {
 			const sqlError = new SqlRecordNotFoundError({
 				message: `Staff id "${staff.id}" not found`
 			});
@@ -126,17 +144,18 @@ class StaffService {
 			color: staff.color
 		});
 
-		await this.staffRepository.update(staffDbModel);
+		await this.staffRepository.update(staffDbModel, userId);
 		return staffDbModel;
 	}
 
 	/**
 	 * Retrieves all staff data.
+	 * @param userId - The ID of the user to retrieve the staff member for.
 	 * @returns A promise that resolves to an array of StaffDataSharedModel objects.
 	 * @throws {DatabaseError} If an unknown database error occurs.
 	 */
-	public async getAll(): Promise<StaffDataSharedModel[]> {
-		let staffs = await this.staffRepository.findAll();
+	public async getAll(userId: string): Promise<StaffDataSharedModel[]> {
+		let staffs = await this.staffRepository.findAll(userId);
 		return staffs.map((staff) => {
 			return new StaffDataSharedModel({
 				id: staff.id,
@@ -152,11 +171,12 @@ class StaffService {
 	/**
 	 * Retrieves a staff member by their name.
 	 * @param name - The name of the staff member to retrieve.
+	 * @param userId - The ID of the user to retrieve the staff member for.
 	 * @returns A promise that resolves to the staff member.
 	 * @throws {SqlRecordNotFoundError} If the staff member with the given name is not found.
 	 */
-	public async getIdByName(name: string): Promise<string> {
-		const staff = await this.staffRepository.findByName(name);
+	public async getIdByName(name: string, userId: string): Promise<string> {
+		const staff = await this.staffRepository.findByName(name, userId);
 		if (staff === null) {
 			const sqlError = new SqlRecordNotFoundError({
 				message: `Staff name "${name}" not found`

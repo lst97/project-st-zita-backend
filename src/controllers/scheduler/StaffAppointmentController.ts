@@ -21,7 +21,10 @@ export class StaffAppointmentController {
 	): Promise<void> {
 		const appointsData = req.body as AppointmentData[];
 		try {
-			await this.appointmentService.createAppointments(appointsData);
+			await this.appointmentService.createAppointments(
+				appointsData,
+				req.user.id
+			);
 			this.responseService.sendSuccess(
 				res,
 				true,
@@ -43,14 +46,6 @@ export class StaffAppointmentController {
 		}
 	}
 
-	public async getAllAppointments(
-		_req: Request,
-		res: Response
-	): Promise<void> {
-		const appointments = await this.appointmentService.getAllAppointments();
-		res.json({ data: appointments });
-	}
-
 	// week_number + year = 142024
 	public async getAllAppointmentsByWeekViewId(
 		req: Request,
@@ -61,7 +56,8 @@ export class StaffAppointmentController {
 		try {
 			const appointments =
 				await this.appointmentService.getAllAppointmentsByWeekViewId(
-					weekViewId
+					weekViewId,
+					req.user.id
 				);
 			this.responseService.sendSuccess(
 				res,
@@ -94,7 +90,8 @@ export class StaffAppointmentController {
 		try {
 			await this.appointmentService.deleteAllAppointmentsByWeekViewIdAndStaffName(
 				staffName,
-				weekViewId
+				weekViewId,
+				req.user.id
 			);
 			this.responseService.sendSuccess(
 				res,
@@ -163,7 +160,8 @@ export class StaffAppointmentController {
 			const appointments =
 				await this.appointmentService.getSharedAppointments(
 					linkId,
-					weekViewId
+					weekViewId,
+					req.user.id
 				);
 			this.responseService.sendSuccess(
 				res,
@@ -204,7 +202,8 @@ export class StaffAppointmentController {
 					exportForm.fromDate,
 					exportForm.toDate,
 					exportForm.method,
-					fileName
+					fileName,
+					req.user.id
 				);
 
 			res.setHeader(

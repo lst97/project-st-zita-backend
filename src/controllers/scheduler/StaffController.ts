@@ -21,7 +21,8 @@ class StaffController {
 		const createStaffForm = req.body as CreateStaffForm;
 		try {
 			const staffDbModel = await this.staffService.create(
-				createStaffForm
+				createStaffForm,
+				req.user.id
 			);
 			this.responseService.sendSuccess(
 				res,
@@ -45,7 +46,7 @@ class StaffController {
 		try {
 			const staffName = req.query.staffName as string;
 
-			await this.staffService.deleteByName(staffName);
+			await this.staffService.deleteByName(staffName, req.user.id);
 			this.responseService.sendSuccess(
 				res,
 				true,
@@ -68,7 +69,10 @@ class StaffController {
 		try {
 			const staffForm = req.body as UpdateStaffForm;
 
-			const updatedStaff = await this.staffService.updateStaff(staffForm);
+			const updatedStaff = await this.staffService.updateStaff(
+				staffForm,
+				req.user.id
+			);
 
 			this.responseService.sendSuccess(
 				res,
@@ -90,7 +94,7 @@ class StaffController {
 
 	public async getAllStaffData(req: Request, res: Response): Promise<void> {
 		try {
-			const staffs = await this.staffService.getAll();
+			const staffs = await this.staffService.getAll(req.user.id);
 			this.responseService.sendSuccess(
 				res,
 				staffs,
