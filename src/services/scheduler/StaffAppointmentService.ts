@@ -10,9 +10,9 @@ import StaffRepository from '../../repositories/scheduler/StaffRepository';
 import {
 	PartialError,
 	SqlRecordNotFoundError
-} from '../../models/error/Errors';
+} from '@lst97/common_response/src/';
 import StaffDbModel from '../../models/database/Staff';
-import ErrorHandlerService from '../ErrorHandlerService';
+import ErrorHandlerService from '@lst97/common_response/src/services/ErrorHandlerService';
 import { ExportHelper, WeeklyExportStrategy } from '../../utils/ExportHelper';
 
 @Service()

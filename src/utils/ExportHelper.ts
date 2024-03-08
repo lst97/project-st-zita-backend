@@ -1,7 +1,7 @@
 import ExcelJS from 'exceljs';
 import { AppointmentData } from '../models/share/scheduler/StaffAppointmentData';
 import moment from 'moment';
-import { ExportAsExcelError } from '../models/error/Errors';
+import { ExportAsExcelError } from '@lst97/common_response/src/';
 
 interface ExportStrategy {
 	exportToExcel(data: AppointmentData[], fileName: string): Promise<Buffer>;

@@ -5,10 +5,10 @@ import DefinedBaseError, {
 	AuthAccessDeniedError,
 	AuthAccessTokenMissingError,
 	ServerInvalidEnvConfigError
-} from '../../models/error/Errors';
+} from '@lst97/common_response/src/models/Errors';
 import Container from 'typedi';
-import ErrorHandlerService from '../../services/ErrorHandlerService';
-import ResponseService from '../../services/response/ResponseService';
+import ErrorHandlerService from '@lst97/common_response/src/services/ErrorHandlerService';
+import ResponseService from '@lst97/common_response/src/services/ResponseService';
 
 export const verifyToken = (
 	req: Request,

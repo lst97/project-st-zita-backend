@@ -6,11 +6,11 @@ import StaffDbModel from '../../models/database/Staff';
 import StaffRepository from '../../repositories/scheduler/StaffRepository';
 import StaffDataSharedModel from '../../models/share/scheduler/StaffData';
 import { Service } from 'typedi';
-import ErrorHandlerService from '../ErrorHandlerService';
+import ErrorHandlerService from '@lst97/common_response/src/services/ErrorHandlerService';
 import {
 	SqlRecordExistsError,
 	SqlRecordNotFoundError
-} from '../../models/error/Errors';
+} from '@lst97/common_response/src/';
 import { StaffAppointmentService } from './StaffAppointmentService';
 import { SQLite3QueryService } from '../DatabaseService';
 

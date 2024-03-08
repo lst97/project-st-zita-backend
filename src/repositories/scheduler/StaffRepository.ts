@@ -11,7 +11,7 @@ import {
 	SqlDeleteError,
 	SqlReadError,
 	SqlUpdateError
-} from '../../models/error/Errors';
+} from '@lst97/common_response/src/';
 
 @Service()
 class StaffRepository implements IStaffRepository {
