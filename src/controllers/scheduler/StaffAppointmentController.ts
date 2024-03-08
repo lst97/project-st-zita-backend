@@ -3,8 +3,8 @@ import { StaffAppointmentService } from '../../services/scheduler/StaffAppointme
 import { AppointmentData } from '../../models/share/scheduler/StaffAppointmentData';
 import { Service } from 'typedi';
 import { CreateShareLinkForm } from '../../models/forms/scheduler/CreateShareLinkForm';
-import ResponseService from '../../services/response/ResponseService';
-import ErrorHandlerService from '../../services/ErrorHandlerService';
+import ResponseService from '@lst97/common_response/src/services/ResponseService';
+import ErrorHandlerService from '@lst97/common_response/src/services/ErrorHandlerService';
 import { ExportAsExcelForm } from '../../models/forms/scheduler/ExportAsExcelForm';
 
 @Service()

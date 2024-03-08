@@ -1,8 +1,8 @@
 import { Service } from 'typedi';
 import sqlite3, { Database } from 'sqlite3';
 import * as DbConstants from '../constants/DatabaseConstants';
-import { DatabaseError } from '../models/error/Errors';
-import ErrorHandlerService from '../services/ErrorHandlerService';
+import { DatabaseError } from '@lst97/common_response/src';
+import ErrorHandlerService from '@lst97/common_response/src/services/ErrorHandlerService';
 
 @Service()
 export class DatabaseService {

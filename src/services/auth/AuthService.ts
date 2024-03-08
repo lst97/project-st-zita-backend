@@ -5,13 +5,13 @@ import { hashPassword, verifyPassword } from '../../utils/HashHelper';
 import jwt from 'jsonwebtoken';
 import { RegistrationForm } from '../../models/forms/auth/RegistrationForm';
 import UserDbModel from '../../models/database/User';
-import ErrorHandlerService from '../ErrorHandlerService';
+import ErrorHandlerService from '@lst97/common_response/src/services/ErrorHandlerService';
 import {
 	AuthInvalidEmailError,
 	AuthInvalidPasswordError,
 	AuthRegistrationFailWithDuplicatedEmailError,
 	ServerInvalidEnvConfigError
-} from '../../models/error/Errors';
+} from '@lst97/common_response/src/';
 import { Request } from 'express';
 
 @Service()

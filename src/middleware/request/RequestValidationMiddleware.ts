@@ -1,14 +1,14 @@
 import { NextFunction, Request, Response } from 'express';
 import Container from 'typedi';
-import ResponseService from '../../services/response/ResponseService';
-import ErrorHandlerService from '../../services/ErrorHandlerService';
+import ResponseService from '@lst97/common_response/src/services/ResponseService';
+import ErrorHandlerService from '@lst97/common_response/src/services/ErrorHandlerService';
 import DefinedBaseError, {
 	ValidateRequestFormError,
 	ValidateRequestParamError,
 	ValidationError
-} from '../../models/error/Errors';
+} from '@lst97/common_response/src/models/Errors';
 import Joi from 'joi';
-import { ValidateRequestQueryError } from '../../models/error/Errors';
+import { ValidateRequestQueryError } from '@lst97/common_response/src/';
 
 // 1. Common Interfaces
 interface ValidationStrategy {
