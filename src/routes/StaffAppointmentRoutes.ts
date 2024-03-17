@@ -61,4 +61,8 @@ router.post('/appointments/export/excel', verifyToken, (req, res) =>
 	staffAppointmentController.exportAppointmentsAsExcel(req, res)
 );
 
+router.delete('/appointments', verifyToken, (req, res) =>
+	staffAppointmentController.deleteAppointmentByDateAndStaffName(req, res)
+);
+
 export default router;

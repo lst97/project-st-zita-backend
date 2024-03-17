@@ -10,7 +10,7 @@ import {
 	SqlDeleteError,
 	SqlReadError,
 	SqlUpdateError
-} from '@lst97/common_response/src/';
+} from '@lst97/common_response';
 
 @Service()
 class StaffAppointmentRepository implements IStaffAppointmentRepository {
@@ -192,6 +192,20 @@ class StaffAppointmentRepository implements IStaffAppointmentRepository {
 			this.databaseService.getDatabase(),
 			'DELETE FROM StaffAppointments WHERE id = ? AND userId = ?',
 			[id, userId],
+			SqlDeleteError
+		);
+	}
+
+	deleteByDateAndStaffId(
+		staffId: string,
+		startDate: string,
+		endDate: string,
+		userId: string
+	): Promise<void> {
+		return this.queryService.runWithSqlErrorHandlingAsync(
+			this.databaseService.getDatabase(),
+			'DELETE FROM StaffAppointments WHERE staffId = ? AND startDate = ? AND endDate = ? AND userId = ?',
+			[staffId, startDate, endDate, userId],
 			SqlDeleteError
 		);
 	}

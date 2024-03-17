@@ -1,25 +1,27 @@
 import jwt from 'jsonwebtoken';
 import { NextFunction, Request, Response } from 'express';
 import { JwtPayload } from '../../models/auth/JwtPayload';
-import DefinedBaseError, {
+import {
+	DefinedBaseError,
 	AuthAccessDeniedError,
 	AuthAccessTokenMissingError,
 	ServerInvalidEnvConfigError
-} from '@lst97/common_response/src/models/Errors';
+} from '@lst97/common_response';
 import Container from 'typedi';
-import ErrorHandlerService from '@lst97/common_response/src/services/ErrorHandlerService';
-import ResponseService from '@lst97/common_response/src/services/ResponseService';
+import { ErrorHandlerService } from '@lst97/common_response';
+import { ResponseService } from '@lst97/common_response';
 
 export const verifyToken = (
 	req: Request,
 	res: Response,
 	next: NextFunction
 ) => {
+	const errorHandlerService = Container.get(ErrorHandlerService);
+	const responseService = Container.get(ResponseService);
+
 	const authHeader = req.headers['authorization'];
 	// Authorization: Bearer <token>
 	const token = authHeader && authHeader.split(' ')[1];
-	const errorHandlerService = Container.get(ErrorHandlerService);
-	const responseService = Container.get(ResponseService);
 
 	try {
 		if (token == null) {

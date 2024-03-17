@@ -10,7 +10,7 @@ import {
 	SqlDeleteError,
 	SqlReadError,
 	SqlUpdateError
-} from '@lst97/common_response/src/';
+} from '@lst97/common_response';
 
 @Service()
 class SharedAppointmentLinkRepository

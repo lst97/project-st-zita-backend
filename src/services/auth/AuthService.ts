@@ -1,17 +1,17 @@
-import { Service } from 'typedi';
+import Container, { Service } from 'typedi';
 import { SignInForm } from '../../models/forms/auth/SignInForm';
 import UserRepository from '../../repositories/auth/UserRepository';
 import { hashPassword, verifyPassword } from '../../utils/HashHelper';
 import jwt from 'jsonwebtoken';
 import { RegistrationForm } from '../../models/forms/auth/RegistrationForm';
 import UserDbModel from '../../models/database/User';
-import ErrorHandlerService from '@lst97/common_response/src/services/ErrorHandlerService';
+import { ErrorHandlerService } from '@lst97/common_response';
 import {
 	AuthInvalidEmailError,
 	AuthInvalidPasswordError,
 	AuthRegistrationFailWithDuplicatedEmailError,
 	ServerInvalidEnvConfigError
-} from '@lst97/common_response/src/';
+} from '@lst97/common_response';
 import { Request } from 'express';
 
 @Service()

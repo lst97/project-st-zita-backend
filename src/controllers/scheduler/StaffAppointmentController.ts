@@ -3,16 +3,16 @@ import { StaffAppointmentService } from '../../services/scheduler/StaffAppointme
 import { AppointmentData } from '../../models/share/scheduler/StaffAppointmentData';
 import { Service } from 'typedi';
 import { CreateShareLinkForm } from '../../models/forms/scheduler/CreateShareLinkForm';
-import ResponseService from '@lst97/common_response/src/services/ResponseService';
-import ErrorHandlerService from '@lst97/common_response/src/services/ErrorHandlerService';
+import { ResponseService } from '@lst97/common_response';
+import { ErrorHandlerService } from '@lst97/common_response';
 import { ExportAsExcelForm } from '../../models/forms/scheduler/ExportAsExcelForm';
 
 @Service()
 export class StaffAppointmentController {
 	constructor(
 		private appointmentService: StaffAppointmentService,
-		private responseService: ResponseService,
-		private errorHandlerService: ErrorHandlerService
+		private errorHandlerService: ErrorHandlerService,
+		private responseService: ResponseService
 	) {}
 
 	public async createAppointments(
@@ -93,6 +93,44 @@ export class StaffAppointmentController {
 				weekViewId,
 				req.user.id
 			);
+			this.responseService.sendSuccess(
+				res,
+				true,
+				req.headers.requestId as string
+			);
+		} catch (error) {
+			if (error instanceof Error) {
+				this.errorHandlerService.handleUnknownError({
+					error: error,
+					service: StaffAppointmentController.name
+				});
+			}
+
+			this.responseService.sendError(
+				res,
+				error as Error,
+				req.headers.requestId as string
+			);
+		}
+	}
+
+	public async deleteAppointmentByDateAndStaffName(
+		req: Request,
+		res: Response
+	) {
+		const staffName = req.query.staffName as string;
+		const startDate = req.query.startDate as string;
+		const endDate = req.query.endDate as string;
+		const userId = req.user.id;
+
+		try {
+			await this.appointmentService.deleteAppointmentByDateAndStaffName(
+				staffName,
+				startDate,
+				endDate,
+				userId
+			);
+
 			this.responseService.sendSuccess(
 				res,
 				true,

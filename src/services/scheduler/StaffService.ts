@@ -5,12 +5,12 @@ import {
 import StaffDbModel from '../../models/database/Staff';
 import StaffRepository from '../../repositories/scheduler/StaffRepository';
 import StaffDataSharedModel from '../../models/share/scheduler/StaffData';
-import { Service } from 'typedi';
-import ErrorHandlerService from '@lst97/common_response/src/services/ErrorHandlerService';
+import Container, { Service } from 'typedi';
+import { ErrorHandlerService } from '@lst97/common_response';
 import {
 	SqlRecordExistsError,
 	SqlRecordNotFoundError
-} from '@lst97/common_response/src/';
+} from '@lst97/common_response/';
 import { StaffAppointmentService } from './StaffAppointmentService';
 import { SQLite3QueryService } from '../DatabaseService';
 
@@ -19,8 +19,8 @@ class StaffService {
 	constructor(
 		private staffRepository: StaffRepository,
 		private appointmentService: StaffAppointmentService,
-		private errorHandlerService: ErrorHandlerService,
-		private dbQueryService: SQLite3QueryService
+		private dbQueryService: SQLite3QueryService,
+		private errorHandlerService: ErrorHandlerService
 	) {}
 
 	/**

@@ -1,0 +1,154 @@
+{
+	"Common": {
+		"OperationSuccess": {
+			"Code": "SUCCESS",
+			"Message": "Operation completed successfully",
+			"StatusCode": 200
+		},
+		"OperationFail": {
+			"Code": "FAILED",
+			"Message": "Internal server error occurred",
+			"StatusCode": 500
+		},
+		"ResourceNotFound": {
+			"Code": "NOT_FOUND",
+			"Message": "Resource not found",
+			"StatusCode": 404
+		},
+		"AccessDenied": {
+			"Code": "ACCESS_DENIED",
+			"Message": "Access denied",
+			"StatusCode": 403
+		},
+		"PartialOperationFail": {
+			"Code": "PARTIAL_FAIL",
+			"Message": "Operation partially failed",
+			"StatusCode": 207
+		}
+	},
+	"Validation": {
+		"InvalidRequest": {
+			"Code": "INVALID_REQUEST",
+			"Message": "Invalid request",
+			"StatusCode": 400
+		},
+		"InvalidRequestForm": {
+			"Code": "INVALID_REQUEST_FORM",
+			"Message": "Invalid request form",
+			"StatusCode": 400
+		},
+		"InvalidRequestParameter": {
+			"Code": "INVALID_REQUEST_PARAMETER",
+			"Message": "Invalid request parameter",
+			"StatusCode": 400
+		},
+		"InvalidRequestQuery": {
+			"Code": "INVALID_REQUEST_QUERY",
+			"Message": "Invalid request query",
+			"StatusCode": 400
+		}
+	},
+	"Server": {
+		"InvalidEnvConfig": {
+			"Code": "MISSING_ENV_CONFIG",
+			"Message": "Environment configuration missing",
+			"StatusCode": 500
+		},
+		"ServerStop": {
+			"Code": "SERVER_STOP",
+			"Message": "Server stopped successfully",
+			"StatusCode": 200
+		}
+	},
+	"Auth": {
+		"AuthFail": {
+			"Code": "AUTH_FAILED",
+			"Message": "Authentication failed",
+			"StatusCode": 401
+		},
+		"RegistrationFailWithDuplicatedEmail": {
+			"Code": "EMAIL_ALREADY_EXISTS",
+			"Message": "Email already exists",
+			"StatusCode": 409
+		},
+		"InvalidCredentials": {
+			"Code": "INVALID_CREDENTIALS",
+			"Message": "Invalid username or password",
+			"StatusCode": 401
+		},
+		"AccessTokenExpired": {
+			"Code": "ACCESS_TOKEN_EXPIRED",
+			"Message": "Session expired, please login again",
+			"StatusCode": 401
+		},
+		"AccessTokenInvalid": {
+			"Code": "INVALID_ACCESS_TOKEN",
+			"Message": "Invalid access token",
+			"StatusCode": 401
+		},
+		"AccessTokenMissing": {
+			"Code": "ACCESS_TOKEN_MISSING",
+			"Message": "Access token is missing",
+			"StatusCode": 401
+		},
+		"InvalidEmail": {
+			"Code": "INVALID_EMAIL",
+			"Message": "Invalid email address",
+			"StatusCode": 400
+		},
+		"InvalidPassword": {
+			"Code": "INCORRECT_PASSWORD",
+			"Message": "Incorrect password",
+			"StatusCode": 400
+		}
+	},
+	"Sql": {
+		"OperationSuccess": {
+			"Code": "QUERY_SUCCESS",
+			"Message": "Query executed successfully",
+			"StatusCode": 200
+		},
+		"OperationFail": {
+			"Code": "QUERY_FAILED",
+			"Message": "Query execution failed",
+			"StatusCode": 500
+		},
+		"RecordExists": {
+			"Code": "RECORD_EXISTS",
+			"Message": "Record already exists",
+			"StatusCode": 409
+		},
+		"RecordNotFound": {
+			"Code": "RECORD_NOT_FOUND",
+			"Message": "Record not found",
+			"StatusCode": 404
+		},
+		"CreateFail": {
+			"Code": "RECORD_CREATE_FAILED",
+			"Message": "Record creation failed",
+			"StatusCode": 500
+		},
+		"UpdateFail": {
+			"Code": "RECORD_UPDATE_FAILED",
+			"Message": "Record update failed",
+			"StatusCode": 500
+		},
+		"DeleteFail": {
+			"Code": "RECORD_DELETE_FAILED",
+			"Message": "Record deletion failed",
+			"StatusCode": 500
+		}
+	},
+	"Export": {
+		"ExportFail": {
+			"Code": "EXPORT_FAILED",
+			"Message": "Export failed",
+			"StatusCode": 500
+		},
+		"ExportAsExcelFail": {
+			"Code": "EXPORT_AS_EXCEL_FAILED",
+			"Message": "Failed to export the data as xlsx",
+			"StatusCode": 500
+		}
+	}
+}

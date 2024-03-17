@@ -5,11 +5,9 @@ import {
 	UpdateStaffForm
 } from '../../models/forms/scheduler/StaffForms';
 import { Service } from 'typedi';
-import ErrorHandlerService from '@lst97/common_response/src/services/ErrorHandlerService';
-import DefinedBaseError, {
-	ControllerError
-} from '@lst97/common_response/src/models/Errors';
-import ResponseService from '@lst97/common_response/src/services/ResponseService';
+import { ErrorHandlerService } from '@lst97/common_response';
+import { DefinedBaseError, ControllerError } from '@lst97/common_response';
+import { ResponseService } from '@lst97/common_response';
 
 @Service()
 class StaffController {

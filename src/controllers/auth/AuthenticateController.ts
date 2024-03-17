@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 import { SignInForm } from '../../models/forms/auth/SignInForm';
 import AuthService from '../../services/auth/AuthService';
 import { RegistrationForm } from '../../models/forms/auth/RegistrationForm';
-import ResponseService from '@lst97/common_response/src/services/ResponseService';
+import { ResponseService } from '@lst97/common_response';
 
 dotenv.config();
 

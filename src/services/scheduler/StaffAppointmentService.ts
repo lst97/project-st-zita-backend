@@ -2,18 +2,15 @@ import StaffAppointmentDbModel from '../../models/database/StaffAppointment';
 import { v4 as uuidv4 } from 'uuid';
 import StaffAppointmentRepository from '../../repositories/scheduler/StaffAppointmentRepository';
 import { AppointmentData } from '../../models/share/scheduler/StaffAppointmentData';
-import { Service } from 'typedi';
+import Container, { Service } from 'typedi';
 import SharedAppointmentLinkRepository from '../../repositories/scheduler/SharedAppointmentLinkRepository';
 import SharedAppointmentLinkDbModel from '../../models/database/SharedLink';
 import { Permission } from '../../utils/PermissionHelper';
 import StaffRepository from '../../repositories/scheduler/StaffRepository';
-import {
-	PartialError,
-	SqlRecordNotFoundError
-} from '@lst97/common_response/src/';
+import { PartialError, SqlRecordNotFoundError } from '@lst97/common_response';
 import StaffDbModel from '../../models/database/Staff';
-import ErrorHandlerService from '@lst97/common_response/src/services/ErrorHandlerService';
 import { ExportHelper, WeeklyExportStrategy } from '../../utils/ExportHelper';
+import { ErrorHandlerService } from '@lst97/common_response';
 
 @Service()
 export class StaffAppointmentService {
@@ -203,6 +200,36 @@ export class StaffAppointmentService {
 		await this.appointmentRepository.deleteByWeekViewIdAndStaffId(
 			staffId,
 			weekViewId,
+			userId
+		);
+	}
+
+	public async deleteAppointmentByDateAndStaffName(
+		staffName: string,
+		startDate: string,
+		endDate: string,
+		userId: string
+	) {
+		const staffId = (
+			await this.staffRepository.findByName(staffName, userId)
+		)?.id;
+		if (!staffId) {
+			const sqlError = new SqlRecordNotFoundError({
+				message: `Staff with name ${staffName} does not exist`
+			});
+
+			this.errorHandlerService.handleError({
+				error: sqlError,
+				service: StaffAppointmentService.name
+			});
+
+			throw sqlError;
+		}
+
+		await this.appointmentRepository.deleteByDateAndStaffId(
+			staffId,
+			startDate,
+			endDate,
 			userId
 		);
 	}

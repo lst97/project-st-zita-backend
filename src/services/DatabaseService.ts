@@ -1,8 +1,8 @@
-import { Service } from 'typedi';
+import Container, { Service } from 'typedi';
 import sqlite3, { Database } from 'sqlite3';
 import * as DbConstants from '../constants/DatabaseConstants';
-import { DatabaseError } from '@lst97/common_response/src';
-import ErrorHandlerService from '@lst97/common_response/src/services/ErrorHandlerService';
+import { DatabaseError } from '@lst97/common_response';
+import { ErrorHandlerService } from '@lst97/common_response';
 
 @Service()
 export class DatabaseService {
@@ -152,8 +152,8 @@ function rollbackTransactionAsync(db: Database): Promise<void> {
  */
 export class SQLite3QueryService {
 	constructor(
-		private errorHandlerService: ErrorHandlerService,
-		private databaseService: DatabaseService
+		private databaseService: DatabaseService,
+		private errorHandlerService: ErrorHandlerService
 	) {}
 
 	/**
