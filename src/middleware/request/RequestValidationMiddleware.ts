@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import Container from 'typedi';
-import { ResponseService } from '@lst97/common_response';
-import { ErrorHandlerService } from '@lst97/common_response';
+import { IErrorHandlerService, IResponseService } from '@lst97/common_response';
 import {
 	DefinedBaseError,
 	ValidateRequestFormError,
@@ -130,8 +129,11 @@ export class RequestQueryValidationStrategy implements ValidationStrategy {
  */
 export function requestValidator(strategy: ValidationStrategy) {
 	return async (req: Request, res: Response, next: NextFunction) => {
-		const responseService = Container.get(ResponseService);
-		const errorHandlerService = Container.get(ErrorHandlerService);
+		const errorHandlerService = Container.get<IErrorHandlerService>(
+			'ErrorHandlerService'
+		);
+		const responseService =
+			Container.get<IResponseService>('ResponseService');
 
 		const result = strategy.validate(req);
 
@@ -150,11 +152,12 @@ export function requestValidator(strategy: ValidationStrategy) {
 				service: 'RequestValidationMiddleware'
 			});
 
-			responseService.sendError(
-				res,
+			const commonResponse = responseService.buildErrorResponse(
 				validationError,
 				req.headers.requestId as string
 			);
+
+			res.status(commonResponse.httpStatus).json(commonResponse.response);
 		} else {
 			next();
 		}

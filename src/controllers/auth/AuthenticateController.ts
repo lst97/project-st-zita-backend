@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 import { SignInForm } from '../../models/forms/auth/SignInForm';
 import AuthService from '../../services/auth/AuthService';
 import { RegistrationForm } from '../../models/forms/auth/RegistrationForm';
-import { ResponseService } from '@lst97/common_response';
+import { IResponseService } from '@lst97/common_response';
 
 dotenv.config();
 
@@ -13,24 +13,26 @@ dotenv.config();
 class AuthenticateController {
 	constructor(
 		private authService: AuthService,
-		private responseService: ResponseService
+		private responseService: IResponseService
 	) {}
 
 	public async signin(req: Request, res: Response): Promise<void> {
 		const signinForm = req.body as SignInForm;
 		try {
 			const accessToken = await this.authService.signin(signinForm, req);
-			this.responseService.sendSuccess(
-				res,
+			const commonResponse = this.responseService.buildSuccessResponse(
 				accessToken,
 				req.headers.requestId as string
 			);
+
+			res.status(commonResponse.httpStatus).json(commonResponse.response);
 		} catch (error) {
-			this.responseService.sendError(
-				res,
+			const commonResponse = this.responseService.buildErrorResponse(
 				error as Error,
 				req.headers.requestId as string
 			);
+
+			res.status(commonResponse.httpStatus).json(commonResponse.response);
 		}
 	}
 
@@ -42,14 +44,14 @@ class AuthenticateController {
 				registrationForm,
 				req
 			);
-			this.responseService.sendSuccess(
-				res,
+			const commonResponse = this.responseService.buildSuccessResponse(
 				userDbModel,
 				req.headers.requestId as string
 			);
+
+			res.status(commonResponse.httpStatus).json(commonResponse.response);
 		} catch (error) {
-			this.responseService.sendError(
-				res,
+			const commonResponse = this.responseService.buildErrorResponse(
 				error as Error,
 				req.headers.requestId as string
 			);

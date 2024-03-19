@@ -13,7 +13,7 @@
 	"author": "lst97",
 	"license": "ISC",
 	"dependencies": {
-		"@lst97/common_response": "^0.1.0-alpha.23",
+		"@lst97/common_response": "^0.1.0-alpha.31",
 		"@types/bcrypt": "^5.0.2",
 		"@types/jsonwebtoken": "^9.0.5",
 		"bcrypt": "^5.1.1",
@@ -23,6 +23,7 @@
 		"express": "^4.18.3",
 		"helmet": "^7.1.0",
 		"image-type": "^5.2.0",
+		"inversify": "^6.0.2",
 		"joi": "^17.12.2",
 		"joi-password": "^4.2.0",
 		"jsonwebtoken": "^9.0.2",
@@ -31,7 +32,6 @@
 		"pino-pretty": "^10.3.1",
 		"sqlite": "^5.1.1",
 		"sqlite3": "^5.1.7",
-		"typedi": "^0.10.0",
 		"typescript": "^5.3.3",
 		"winston": "^3.11.0"
 	},

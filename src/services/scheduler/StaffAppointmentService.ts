@@ -2,7 +2,7 @@ import StaffAppointmentDbModel from '../../models/database/StaffAppointment';
 import { v4 as uuidv4 } from 'uuid';
 import StaffAppointmentRepository from '../../repositories/scheduler/StaffAppointmentRepository';
 import { AppointmentData } from '../../models/share/scheduler/StaffAppointmentData';
-import Container, { Service } from 'typedi';
+import Container, { Inject, Service } from 'typedi';
 import SharedAppointmentLinkRepository from '../../repositories/scheduler/SharedAppointmentLinkRepository';
 import SharedAppointmentLinkDbModel from '../../models/database/SharedLink';
 import { Permission } from '../../utils/PermissionHelper';
@@ -10,7 +10,7 @@ import StaffRepository from '../../repositories/scheduler/StaffRepository';
 import { PartialError, SqlRecordNotFoundError } from '@lst97/common_response';
 import StaffDbModel from '../../models/database/Staff';
 import { ExportHelper, WeeklyExportStrategy } from '../../utils/ExportHelper';
-import { ErrorHandlerService } from '@lst97/common_response';
+import { IErrorHandlerService } from '@lst97/common_response';
 
 @Service()
 export class StaffAppointmentService {
@@ -18,7 +18,8 @@ export class StaffAppointmentService {
 		private staffRepository: StaffRepository,
 		private appointmentRepository: StaffAppointmentRepository,
 		private shareAppointmentLinkRepository: SharedAppointmentLinkRepository,
-		private errorHandlerService: ErrorHandlerService
+		@Inject('ErrorHandlerService')
+		private errorHandlerService: IErrorHandlerService
 	) {}
 
 	/**

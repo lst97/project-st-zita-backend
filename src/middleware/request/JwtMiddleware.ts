@@ -5,19 +5,21 @@ import {
 	DefinedBaseError,
 	AuthAccessDeniedError,
 	AuthAccessTokenMissingError,
-	ServerInvalidEnvConfigError
+	ServerInvalidEnvConfigError,
+	IErrorHandlerService,
+	IResponseService
 } from '@lst97/common_response';
 import Container from 'typedi';
-import { ErrorHandlerService } from '@lst97/common_response';
-import { ResponseService } from '@lst97/common_response';
 
 export const verifyToken = (
 	req: Request,
 	res: Response,
 	next: NextFunction
 ) => {
-	const errorHandlerService = Container.get(ErrorHandlerService);
-	const responseService = Container.get(ResponseService);
+	const errorHandlerService = Container.get<IErrorHandlerService>(
+		'ErrorHandlerService'
+	);
+	const responseService = Container.get<IResponseService>('ResponseService');
 
 	const authHeader = req.headers['authorization'];
 	// Authorization: Bearer <token>
@@ -57,11 +59,12 @@ export const verifyToken = (
 				service: verifyToken.name
 			});
 
-			return responseService.sendError(
-				res,
+			const commonResponse = responseService.buildErrorResponse(
 				error,
 				req.headers.requestId as string
 			);
+
+			res.status(commonResponse.httpStatus).json(commonResponse.response);
 		} else {
 			errorHandlerService.handleUnknownError({
 				error: error as Error,
@@ -72,11 +75,12 @@ export const verifyToken = (
 				req.headers.requestId as string
 			)!;
 
-			return responseService.sendError(
-				res,
+			const commonResponse = responseService.buildErrorResponse(
 				rootCause,
 				req.headers.requestId as string
 			);
+
+			res.status(commonResponse.httpStatus).json(commonResponse.response);
 		}
 	}
 };

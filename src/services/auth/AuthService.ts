@@ -1,11 +1,11 @@
-import Container, { Service } from 'typedi';
+import { Inject, Service } from 'typedi';
 import { SignInForm } from '../../models/forms/auth/SignInForm';
 import UserRepository from '../../repositories/auth/UserRepository';
 import { hashPassword, verifyPassword } from '../../utils/HashHelper';
 import jwt from 'jsonwebtoken';
 import { RegistrationForm } from '../../models/forms/auth/RegistrationForm';
 import UserDbModel from '../../models/database/User';
-import { ErrorHandlerService } from '@lst97/common_response';
+import { IErrorHandlerService } from '@lst97/common_response';
 import {
 	AuthInvalidEmailError,
 	AuthInvalidPasswordError,
@@ -18,7 +18,8 @@ import { Request } from 'express';
 class AuthService {
 	constructor(
 		private userRepository: UserRepository,
-		private errorHandlerService: ErrorHandlerService
+		@Inject('ErrorHandlerService')
+		private errorHandlerService: IErrorHandlerService
 	) {}
 
 	public async signin(form: SignInForm, req: Request): Promise<string> {

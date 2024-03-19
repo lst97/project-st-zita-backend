@@ -3,16 +3,15 @@ import { StaffAppointmentService } from '../../services/scheduler/StaffAppointme
 import { AppointmentData } from '../../models/share/scheduler/StaffAppointmentData';
 import { Service } from 'typedi';
 import { CreateShareLinkForm } from '../../models/forms/scheduler/CreateShareLinkForm';
-import { ResponseService } from '@lst97/common_response';
-import { ErrorHandlerService } from '@lst97/common_response';
+import { IErrorHandlerService, IResponseService } from '@lst97/common_response';
 import { ExportAsExcelForm } from '../../models/forms/scheduler/ExportAsExcelForm';
 
 @Service()
 export class StaffAppointmentController {
 	constructor(
 		private appointmentService: StaffAppointmentService,
-		private errorHandlerService: ErrorHandlerService,
-		private responseService: ResponseService
+		private errorHandlerService: IErrorHandlerService,
+		private responseService: IResponseService
 	) {}
 
 	public async createAppointments(
@@ -25,11 +24,12 @@ export class StaffAppointmentController {
 				appointsData,
 				req.user.id
 			);
-			this.responseService.sendSuccess(
-				res,
+			const commonResponse = this.responseService.buildSuccessResponse(
 				true,
 				req.headers.requestId as string
 			);
+
+			res.status(commonResponse.httpStatus).json(commonResponse.response);
 		} catch (error) {
 			if (error instanceof Error) {
 				this.errorHandlerService.handleUnknownError({
@@ -38,11 +38,12 @@ export class StaffAppointmentController {
 				});
 			}
 
-			this.responseService.sendError(
-				res,
+			const commonResponse = this.responseService.buildErrorResponse(
 				error as Error,
 				req.headers.requestId as string
 			);
+
+			res.status(commonResponse.httpStatus).json(commonResponse.response);
 		}
 	}
 
@@ -59,11 +60,12 @@ export class StaffAppointmentController {
 					weekViewId,
 					req.user.id
 				);
-			this.responseService.sendSuccess(
-				res,
+			const commonResponse = this.responseService.buildSuccessResponse(
 				appointments,
 				req.headers.requestId as string
 			);
+
+			res.status(commonResponse.httpStatus).json(commonResponse.response);
 		} catch (error) {
 			if (error instanceof Error) {
 				this.errorHandlerService.handleUnknownError({
@@ -72,11 +74,12 @@ export class StaffAppointmentController {
 				});
 			}
 
-			this.responseService.sendError(
-				res,
+			const commonResponse = this.responseService.buildErrorResponse(
 				error as Error,
 				req.headers.requestId as string
 			);
+
+			res.status(commonResponse.httpStatus).json(commonResponse.response);
 		}
 	}
 
@@ -93,11 +96,12 @@ export class StaffAppointmentController {
 				weekViewId,
 				req.user.id
 			);
-			this.responseService.sendSuccess(
-				res,
+			const commonResponse = this.responseService.buildSuccessResponse(
 				true,
 				req.headers.requestId as string
 			);
+
+			res.status(commonResponse.httpStatus).json(commonResponse.response);
 		} catch (error) {
 			if (error instanceof Error) {
 				this.errorHandlerService.handleUnknownError({
@@ -106,11 +110,12 @@ export class StaffAppointmentController {
 				});
 			}
 
-			this.responseService.sendError(
-				res,
+			const commonResponse = this.responseService.buildErrorResponse(
 				error as Error,
 				req.headers.requestId as string
 			);
+
+			res.status(commonResponse.httpStatus).json(commonResponse.response);
 		}
 	}
 
@@ -131,11 +136,12 @@ export class StaffAppointmentController {
 				userId
 			);
 
-			this.responseService.sendSuccess(
-				res,
+			const commonResponse = this.responseService.buildSuccessResponse(
 				true,
 				req.headers.requestId as string
 			);
+
+			res.status(commonResponse.httpStatus).json(commonResponse.response);
 		} catch (error) {
 			if (error instanceof Error) {
 				this.errorHandlerService.handleUnknownError({
@@ -144,11 +150,12 @@ export class StaffAppointmentController {
 				});
 			}
 
-			this.responseService.sendError(
-				res,
+			const commonResponse = this.responseService.buildErrorResponse(
 				error as Error,
 				req.headers.requestId as string
 			);
+
+			res.status(commonResponse.httpStatus).json(commonResponse.response);
 		}
 	}
 
@@ -166,11 +173,12 @@ export class StaffAppointmentController {
 				shareLinkForm.expiry,
 				shareLinkForm.weekViewIds
 			);
-			this.responseService.sendSuccess(
-				res,
+			const commonResponse = this.responseService.buildSuccessResponse(
 				link,
 				req.headers.requestId as string
 			);
+
+			res.status(commonResponse.httpStatus).json(commonResponse.response);
 		} catch (error) {
 			if (error instanceof Error) {
 				this.errorHandlerService.handleUnknownError({
@@ -179,11 +187,12 @@ export class StaffAppointmentController {
 				});
 			}
 
-			this.responseService.sendError(
-				res,
+			const commonResponse = this.responseService.buildErrorResponse(
 				error as Error,
 				req.headers.requestId as string
 			);
+
+			res.status(commonResponse.httpStatus).json(commonResponse.response);
 		}
 	}
 
@@ -200,11 +209,12 @@ export class StaffAppointmentController {
 					linkId,
 					weekViewId
 				);
-			this.responseService.sendSuccess(
-				res,
+			const commonResponse = this.responseService.buildSuccessResponse(
 				appointments,
 				req.headers.requestId as string
 			);
+
+			res.status(commonResponse.httpStatus).json(commonResponse.response);
 		} catch (error) {
 			if (error instanceof Error) {
 				this.errorHandlerService.handleUnknownError({
@@ -213,11 +223,12 @@ export class StaffAppointmentController {
 				});
 			}
 
-			this.responseService.sendError(
-				res,
+			const commonResponse = this.responseService.buildErrorResponse(
 				error as Error,
 				req.headers.requestId as string
 			);
+
+			res.status(commonResponse.httpStatus).json(commonResponse.response);
 		}
 	}
 
@@ -248,11 +259,12 @@ export class StaffAppointmentController {
 				'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 			);
 
-			this.responseService.sendSuccess(
-				res,
+			const commonResponse = this.responseService.buildSuccessResponse(
 				{ fileName: fileName, buffer: excelBuffer.toString('base64') },
 				req.headers.requestId as string
 			);
+
+			res.status(commonResponse.httpStatus).json(commonResponse.response);
 		} catch (error) {
 			if (error instanceof Error) {
 				this.errorHandlerService.handleUnknownError({
@@ -261,11 +273,12 @@ export class StaffAppointmentController {
 				});
 			}
 
-			this.responseService.sendError(
-				res,
+			const commonResponse = this.responseService.buildErrorResponse(
 				error as Error,
 				req.headers.requestId as string
 			);
+
+			res.status(commonResponse.httpStatus).json(commonResponse.response);
 		}
 	}
 }

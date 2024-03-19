@@ -5,16 +5,16 @@ import {
 	UpdateStaffForm
 } from '../../models/forms/scheduler/StaffForms';
 import { Service } from 'typedi';
-import { ErrorHandlerService } from '@lst97/common_response';
+import { IErrorHandlerService } from '@lst97/common_response';
 import { DefinedBaseError, ControllerError } from '@lst97/common_response';
-import { ResponseService } from '@lst97/common_response';
+import { IResponseService } from '@lst97/common_response';
 
 @Service()
 class StaffController {
 	constructor(
 		private staffService: StaffService,
-		private errorHandlerService: ErrorHandlerService,
-		private responseService: ResponseService
+		private errorHandlerService: IErrorHandlerService,
+		private responseService: IResponseService
 	) {}
 
 	public async createStaff(req: Request, res: Response): Promise<void> {
@@ -24,11 +24,12 @@ class StaffController {
 				createStaffForm,
 				req.user.id
 			);
-			this.responseService.sendSuccess(
-				res,
+			const commonResponse = this.responseService.buildSuccessResponse(
 				staffDbModel,
 				req.headers.requestId as string
 			);
+
+			res.status(commonResponse.httpStatus).json(commonResponse.response);
 		} catch (error) {
 			if (!(error instanceof DefinedBaseError)) {
 				this.errorHandlerService.handleUnknownControllerError({
@@ -38,7 +39,11 @@ class StaffController {
 				});
 			}
 
-			this.responseService.sendError(res, error as Error, req.id);
+			const commonResponse = this.responseService.buildErrorResponse(
+				error as Error,
+				req.id
+			);
+			res.status(commonResponse.httpStatus).json(commonResponse.response);
 		}
 	}
 
@@ -47,11 +52,12 @@ class StaffController {
 			const staffName = req.query.staffName as string;
 
 			await this.staffService.deleteByName(staffName, req.user.id);
-			this.responseService.sendSuccess(
-				res,
+			const commonResponse = this.responseService.buildSuccessResponse(
 				true,
 				req.headers.requestId as string
 			);
+
+			res.status(commonResponse.httpStatus).json(commonResponse.response);
 		} catch (error) {
 			if (!(error instanceof DefinedBaseError)) {
 				this.errorHandlerService.handleUnknownControllerError({
@@ -61,7 +67,11 @@ class StaffController {
 				});
 			}
 
-			this.responseService.sendError(res, error as Error, req.id);
+			const commonResponse = this.responseService.buildErrorResponse(
+				error as Error,
+				req.id
+			);
+			res.status(commonResponse.httpStatus).json(commonResponse.response);
 		}
 	}
 
@@ -74,11 +84,12 @@ class StaffController {
 				req.user.id
 			);
 
-			this.responseService.sendSuccess(
-				res,
+			const commonResponse = this.responseService.buildSuccessResponse(
 				updatedStaff,
 				req.headers.requestId as string
 			);
+
+			res.status(commonResponse.httpStatus).json(commonResponse.response);
 		} catch (error) {
 			if (!(error instanceof DefinedBaseError)) {
 				this.errorHandlerService.handleUnknownControllerError({
@@ -88,18 +99,23 @@ class StaffController {
 				});
 			}
 
-			this.responseService.sendError(res, error as Error, req.id);
+			const commonResponse = this.responseService.buildErrorResponse(
+				error as Error,
+				req.id
+			);
+			res.status(commonResponse.httpStatus).json(commonResponse.response);
 		}
 	}
 
 	public async getAllStaffData(req: Request, res: Response): Promise<void> {
 		try {
 			const staffs = await this.staffService.getAll(req.user.id);
-			this.responseService.sendSuccess(
-				res,
+			const commonResponse = this.responseService.buildSuccessResponse(
 				staffs,
 				req.headers.requestId as string
 			);
+
+			res.status(commonResponse.httpStatus).json(commonResponse.response);
 		} catch (error) {
 			if (!(error instanceof DefinedBaseError)) {
 				this.errorHandlerService.handleUnknownControllerError({
@@ -109,7 +125,12 @@ class StaffController {
 				});
 			}
 
-			this.responseService.sendError(res, error as Error, req.id);
+			const commonResponse = this.responseService.buildErrorResponse(
+				error as Error,
+				req.id
+			);
+
+			res.status(commonResponse.httpStatus).json(commonResponse.response);
 		}
 	}
 }

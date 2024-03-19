@@ -5,8 +5,8 @@ import {
 import StaffDbModel from '../../models/database/Staff';
 import StaffRepository from '../../repositories/scheduler/StaffRepository';
 import StaffDataSharedModel from '../../models/share/scheduler/StaffData';
-import Container, { Service } from 'typedi';
-import { ErrorHandlerService } from '@lst97/common_response';
+import { Inject, Service } from 'typedi';
+import { IErrorHandlerService } from '@lst97/common_response';
 import {
 	SqlRecordExistsError,
 	SqlRecordNotFoundError
@@ -20,7 +20,8 @@ class StaffService {
 		private staffRepository: StaffRepository,
 		private appointmentService: StaffAppointmentService,
 		private dbQueryService: SQLite3QueryService,
-		private errorHandlerService: ErrorHandlerService
+		@Inject('ErrorHandlerService')
+		private errorHandlerService: IErrorHandlerService
 	) {}
 
 	/**

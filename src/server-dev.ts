@@ -8,8 +8,14 @@ import authenticationRoutes from './routes/AuthenticateRoutes';
 import { API_ENDPOINT, PORT } from './constants/ServerConstants';
 import cors from 'cors';
 import { requestId } from './middleware/request/RequestIdMiddleware';
+import Container from 'typedi';
+import { errorHandlerService, responseService } from '@lst97/common_response';
 
 const app = express();
+
+// TODO: migrate to inversify
+Container.set('ErrorHandlerService', errorHandlerService);
+Container.set('ResponseService', responseService);
 
 app.use(helmet());
 
