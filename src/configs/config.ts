@@ -5,9 +5,9 @@ import * as path from 'path';
 export interface IAppConfig {
 	port: number;
 	host: string;
+	protocol: string;
 	apiVersion: string;
 	apiEndpoint: string;
-	apiBaseUrl: string;
 	database: {
 		connectionString: string;
 	};
@@ -22,12 +22,12 @@ export interface IAppConfig {
 	environment: string;
 }
 
-class AppConfig {
+class AppConfig implements IAppConfig {
 	port: number;
 	host: string;
+	protocol: string;
 	apiVersion: string;
 	apiEndpoint: string;
-	apiBaseUrl: string;
 	database: {
 		connectionString: string;
 	};
@@ -46,11 +46,11 @@ class AppConfig {
 		this.host = configData.host;
 		this.apiVersion = configData.apiVersion;
 		this.apiEndpoint = configData.apiEndpoint;
-		this.apiBaseUrl = configData.apiBaseUrl;
 		this.database = configData.database;
 		this.certificates = configData.certificates;
 		this.appIdentifier = configData.appIdentifier;
 		this.environment = configData.environment;
+		this.protocol = configData.protocol;
 	}
 }
 

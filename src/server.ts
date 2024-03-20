@@ -11,6 +11,8 @@ import StaffAppointmentRoutes from './routes/StaffAppointmentRoutes';
 import AuthenticateRoutes from './routes/AuthenticateRoutes';
 import Credentials from './configs/credentials';
 import https from 'https';
+import { RequestLoggerMiddleware } from './middleware/request/RequestLoggerMiddleware';
+import ResponseLoggerMiddleware from './middleware/response/ResponseLoggerMiddleware';
 
 /**
  * The App class represents the main application.
@@ -42,19 +44,22 @@ class App {
 		this.app.use(cors());
 		this.app.use(express.json());
 		this.app.use(RequestHeaderMiddleware.requestId);
+		this.app.use(RequestLoggerMiddleware.requestLogger);
+
+		this.app.use(ResponseLoggerMiddleware.responseLogger);
 	}
 
 	private routes(): void {
 		this.app.use(
-			`${appConfig.apiEndpoint}`,
+			`${appConfig.apiEndpoint}/${appConfig.apiVersion}`,
 			container.get(StaffRoutes).routers
 		);
 		this.app.use(
-			`${appConfig.apiEndpoint}`,
+			`${appConfig.apiEndpoint}/${appConfig.apiVersion}`,
 			container.get(StaffAppointmentRoutes).routers
 		);
 		this.app.use(
-			`${appConfig.apiEndpoint}`,
+			`${appConfig.apiEndpoint}/${appConfig.apiVersion}`,
 			container.get(AuthenticateRoutes).routers
 		);
 	}
@@ -79,7 +84,9 @@ const port = app.Config.port;
 const environment = app.Config.environment;
 
 app.listen(port, () => {
-	console.log(`(${environment}) Server is running on port ${port}`);
+	console.log(
+		`(${environment}) Server is running on ${app.Config.protocol}://${app.Config.host}:${port} 🚀`
+	);
 });
 
 // function csrf(): any {

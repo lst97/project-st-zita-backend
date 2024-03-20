@@ -1,8 +1,8 @@
 port: 1168
 host: localhost
+protocol: http
 apiVersion: v1
-apiEndpoint: /api/v1
-apiBaseUrl: http://localhost:1168/api/v1
+apiEndpoint: /api
 database:
     connectionString: ./data.db
 certificates:

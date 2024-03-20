@@ -60,7 +60,6 @@ function buildControllerContainers() {
 
 function buildMiddlewareContainers() {
 	container.bind(JwtMiddlewareService).toSelf().inTransientScope();
-	container.bind(RequestHeaderMiddleware).toSelf().inTransientScope();
 	container.bind(RequestValidationMiddleware).toSelf().inTransientScope();
 }
 
