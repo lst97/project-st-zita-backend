@@ -2,7 +2,6 @@ import StaffAppointmentDbModel from '../../models/database/StaffAppointment';
 import { v4 as uuidv4 } from 'uuid';
 import StaffAppointmentRepository from '../../repositories/scheduler/StaffAppointmentRepository';
 import { AppointmentData } from '../../models/share/scheduler/StaffAppointmentData';
-import Container, { Inject, Service } from 'typedi';
 import SharedAppointmentLinkRepository from '../../repositories/scheduler/SharedAppointmentLinkRepository';
 import SharedAppointmentLinkDbModel from '../../models/database/SharedLink';
 import { Permission } from '../../utils/PermissionHelper';
@@ -11,14 +10,15 @@ import { PartialError, SqlRecordNotFoundError } from '@lst97/common_response';
 import StaffDbModel from '../../models/database/Staff';
 import { ExportHelper, WeeklyExportStrategy } from '../../utils/ExportHelper';
 import { IErrorHandlerService } from '@lst97/common_response';
+import { inject, injectable } from 'inversify';
 
-@Service()
+@injectable()
 export class StaffAppointmentService {
 	constructor(
 		private staffRepository: StaffRepository,
 		private appointmentRepository: StaffAppointmentRepository,
 		private shareAppointmentLinkRepository: SharedAppointmentLinkRepository,
-		@Inject('ErrorHandlerService')
+		@inject('ErrorHandlerService')
 		private errorHandlerService: IErrorHandlerService
 	) {}
 

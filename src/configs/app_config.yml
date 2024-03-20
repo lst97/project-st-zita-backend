@@ -1,0 +1,14 @@
+port: 1168
+host: localhost
+apiVersion: v1
+apiEndpoint: /api/v1
+apiBaseUrl: http://localhost:1168/api/v1
+database:
+    connectionString: ./data.db
+certificates:
+    privateKey: /etc/letsencrypt/live/lst97.tplinkdns.com/privkey.pem
+    certificate: /etc/letsencrypt/live/lst97.tplinkdns.com/cert.pem
+    ca: /etc/letsencrypt/live/lst97.tplinkdns.com/chain.pem
+appIdentifier:
+    name: stzita
+environment: development

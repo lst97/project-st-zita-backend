@@ -4,7 +4,6 @@ import {
 } from '../../services/DatabaseService';
 import IStaffRepository from './interfaces/IStaffRepository';
 import StaffDbModel from '../../models/database/Staff';
-import { Service } from 'typedi';
 
 import {
 	SqlCreateError,
@@ -12,12 +11,13 @@ import {
 	SqlReadError,
 	SqlUpdateError
 } from '@lst97/common_response/';
+import { inject, injectable } from 'inversify';
 
-@Service()
+@injectable()
 class StaffRepository implements IStaffRepository {
 	constructor(
-		private databaseService: DatabaseService,
-		private queryService: SQLite3QueryService
+		@inject(DatabaseService) private databaseService: DatabaseService,
+		@inject(SQLite3QueryService) private queryService: SQLite3QueryService
 	) {}
 
 	/**

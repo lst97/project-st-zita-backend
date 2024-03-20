@@ -1,6 +1,5 @@
 import IStaffAppointmentRepository from './interfaces/IStaffAppointmentRepository';
 import StaffAppointmentDbModel from '../../models/database/StaffAppointment';
-import { Service } from 'typedi';
 import {
 	DatabaseService,
 	SQLite3QueryService
@@ -11,12 +10,13 @@ import {
 	SqlReadError,
 	SqlUpdateError
 } from '@lst97/common_response';
+import { inject, injectable } from 'inversify';
 
-@Service()
+@injectable()
 class StaffAppointmentRepository implements IStaffAppointmentRepository {
 	constructor(
-		private databaseService: DatabaseService,
-		private queryService: SQLite3QueryService
+		@inject(DatabaseService) private databaseService: DatabaseService,
+		@inject(SQLite3QueryService) private queryService: SQLite3QueryService
 	) {}
 	/**
 	 * Finds a staff appointment by its ID.

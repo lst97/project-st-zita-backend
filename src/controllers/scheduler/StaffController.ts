@@ -4,17 +4,18 @@ import {
 	CreateStaffForm,
 	UpdateStaffForm
 } from '../../models/forms/scheduler/StaffForms';
-import { Service } from 'typedi';
 import { IErrorHandlerService } from '@lst97/common_response';
 import { DefinedBaseError, ControllerError } from '@lst97/common_response';
 import { IResponseService } from '@lst97/common_response';
+import { inject, injectable } from 'inversify';
 
-@Service()
+@injectable()
 class StaffController {
 	constructor(
 		private staffService: StaffService,
+		@inject('ErrorHandlerService')
 		private errorHandlerService: IErrorHandlerService,
-		private responseService: IResponseService
+		@inject('ResponseService') private responseService: IResponseService
 	) {}
 
 	public async createStaff(req: Request, res: Response): Promise<void> {

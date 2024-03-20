@@ -2,7 +2,6 @@ import {
 	DatabaseService,
 	SQLite3QueryService
 } from '../../services/DatabaseService';
-import { Service } from 'typedi';
 import ISharedAppointmentLinkRepository from './interfaces/ISharedAppointmentLinkRepository';
 import SharedAppointmentLinkDbModel from '../../models/database/SharedLink';
 import {
@@ -11,14 +10,15 @@ import {
 	SqlReadError,
 	SqlUpdateError
 } from '@lst97/common_response';
+import { inject, injectable } from 'inversify';
 
-@Service()
+@injectable()
 class SharedAppointmentLinkRepository
 	implements ISharedAppointmentLinkRepository
 {
 	constructor(
-		private databaseService: DatabaseService,
-		private queryService: SQLite3QueryService
+		@inject(DatabaseService) private databaseService: DatabaseService,
+		@inject(SQLite3QueryService) private queryService: SQLite3QueryService
 	) {}
 
 	/**

@@ -1,4 +1,3 @@
-import { Inject, Service } from 'typedi';
 import { SignInForm } from '../../models/forms/auth/SignInForm';
 import UserRepository from '../../repositories/auth/UserRepository';
 import { hashPassword, verifyPassword } from '../../utils/HashHelper';
@@ -13,12 +12,13 @@ import {
 	ServerInvalidEnvConfigError
 } from '@lst97/common_response';
 import { Request } from 'express';
+import { inject, injectable } from 'inversify';
 
-@Service()
+@injectable()
 class AuthService {
 	constructor(
 		private userRepository: UserRepository,
-		@Inject('ErrorHandlerService')
+		@inject('ErrorHandlerService')
 		private errorHandlerService: IErrorHandlerService
 	) {}
 

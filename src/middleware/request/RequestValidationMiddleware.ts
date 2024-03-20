@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from 'express';
-import Container from 'typedi';
 import { IErrorHandlerService, IResponseService } from '@lst97/common_response';
 import {
 	DefinedBaseError,
@@ -9,8 +8,9 @@ import {
 } from '@lst97/common_response';
 import Joi from 'joi';
 import { ValidateRequestQueryError } from '@lst97/common_response';
+import container from '../../inversify.config';
+import { injectable } from 'inversify';
 
-// 1. Common Interfaces
 interface ValidationStrategy {
 	validate(req: Request): ValidationResult;
 }
@@ -21,7 +21,6 @@ interface ValidationResult {
 	errors?: DefinedBaseError[];
 }
 
-// 2. Validation Strategies
 /**
  * Represents a validation strategy for validating request body.
  */
@@ -121,45 +120,53 @@ export class RequestQueryValidationStrategy implements ValidationStrategy {
 	}
 }
 
-// 3. Generic Middleware
-/**
- * Middleware function that performs request validation using a specified validation strategy.
- * @param strategy The validation strategy to use.
- * @returns The middleware function.
- */
-export function requestValidator(strategy: ValidationStrategy) {
-	return async (req: Request, res: Response, next: NextFunction) => {
-		const errorHandlerService = Container.get<IErrorHandlerService>(
-			'ErrorHandlerService'
-		);
-		const responseService =
-			Container.get<IResponseService>('ResponseService');
+@injectable()
+class RequestValidationMiddleware {
+	constructor() {}
 
-		const result = strategy.validate(req);
-
-		if (!result.isValid) {
-			const errorMessage = result
-				.errors!.map((error) => error.message)
-				.join('\n');
-
-			const validationError = new ValidationError({
-				message: errorMessage,
-				cause: result.errors![0]
-			});
-
-			errorHandlerService.handleError({
-				error: validationError,
-				service: 'RequestValidationMiddleware'
-			});
-
-			const commonResponse = responseService.buildErrorResponse(
-				validationError,
-				req.headers.requestId as string
+	/**
+	 * Middleware function that performs request validation using a specified validation strategy.
+	 * @param strategy The validation strategy to use.
+	 * @returns The middleware function.
+	 */
+	public requestValidator(strategy: ValidationStrategy) {
+		return async (req: Request, res: Response, next: NextFunction) => {
+			const errorHandlerService = container.get<IErrorHandlerService>(
+				'ErrorHandlerService'
 			);
+			const responseService =
+				container.get<IResponseService>('ResponseService');
 
-			res.status(commonResponse.httpStatus).json(commonResponse.response);
-		} else {
-			next();
-		}
-	};
+			const result = strategy.validate(req);
+
+			if (!result.isValid) {
+				const errorMessage = result
+					.errors!.map((error) => error.message)
+					.join('\n');
+
+				const validationError = new ValidationError({
+					message: errorMessage,
+					cause: result.errors![0]
+				});
+
+				errorHandlerService.handleError({
+					error: validationError,
+					service: RequestValidationMiddleware.name
+				});
+
+				const commonResponse = responseService.buildErrorResponse(
+					validationError,
+					req.headers.requestId as string
+				);
+
+				res.status(commonResponse.httpStatus).json(
+					commonResponse.response
+				);
+			} else {
+				next();
+			}
+		};
+	}
 }
+
+export default RequestValidationMiddleware;

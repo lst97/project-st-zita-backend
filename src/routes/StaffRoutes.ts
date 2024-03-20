@@ -1,12 +1,12 @@
 import express from 'express';
 import StaffController from '../controllers/scheduler/StaffController';
-import { Container } from 'typedi';
-import { verifyToken } from '../middleware/request/JwtMiddleware';
-import {
-	RequestBodyValidationStrategy,
-	requestValidator
+import RequestValidationMiddleware, {
+	RequestBodyValidationStrategy
 } from '../middleware/request/RequestValidationMiddleware';
 import { StaffSchema } from '../schemas/StaffSchema';
+import container from '../inversify.config';
+import { JwtMiddlewareService } from '../middleware/request/JwtMiddleware';
+import { inject, injectable } from 'inversify';
 
 // TODO: add asyncHandler middleware (sprint 2)
 /// Example
@@ -22,37 +22,61 @@ import { StaffSchema } from '../schemas/StaffSchema';
 //   res.status(500).send('Something went wrong!');
 // });
 
-const router = express.Router();
+@injectable()
+class StaffRoutes {
+	private router: express.Router;
 
-router.post(
-	'/staffs',
-	verifyToken,
-	requestValidator(
-		new RequestBodyValidationStrategy(StaffSchema.createFormSchema)
-	),
-	(req, res) => {
-		const staffController = Container.get(StaffController);
-		staffController.createStaff(req, res);
+	public get routers(): express.Router {
+		return this.router;
 	}
-);
-router.delete('/staffs', verifyToken, (req, res) => {
-	const staffController = Container.get(StaffController);
-	staffController.deleteStaff(req, res);
-});
-router.get('/staffs', verifyToken, (req, res) => {
-	const staffController = Container.get(StaffController);
-	staffController.getAllStaffData(req, res);
-});
-router.put(
-	'/staffs/edit',
-	verifyToken,
-	requestValidator(
-		new RequestBodyValidationStrategy(StaffSchema.updateFormSchema)
-	),
-	(req, res) => {
-		const staffController = Container.get(StaffController);
-		staffController.editStaff(req, res);
-	}
-);
 
-export default router;
+	constructor(
+		@inject(StaffController) private staffController: StaffController,
+		@inject(JwtMiddlewareService)
+		private jwtMiddlewareService: JwtMiddlewareService,
+		@inject(RequestValidationMiddleware)
+		private requestValidationMiddleware: RequestValidationMiddleware
+	) {
+		this.router = express.Router();
+		this.configureRoutes();
+	}
+
+	public configureRoutes(): void {
+		this.router.post(
+			'/staffs',
+			this.jwtMiddlewareService.verifyToken,
+			this.requestValidationMiddleware.requestValidator(
+				new RequestBodyValidationStrategy(StaffSchema.createFormSchema)
+			),
+			(req, res) => {
+				this.staffController.createStaff(req, res);
+			}
+		);
+		this.router.delete(
+			'/staffs',
+			this.jwtMiddlewareService.verifyToken,
+			(req, res) => {
+				this.staffController.deleteStaff(req, res);
+			}
+		);
+		this.router.get(
+			'/staffs',
+			this.jwtMiddlewareService.verifyToken,
+			(req, res) => {
+				this.staffController.getAllStaffData(req, res);
+			}
+		);
+		this.router.put(
+			'/staffs/edit',
+			this.jwtMiddlewareService.verifyToken,
+			this.requestValidationMiddleware.requestValidator(
+				new RequestBodyValidationStrategy(StaffSchema.updateFormSchema)
+			),
+			(req, res) => {
+				this.staffController.editStaff(req, res);
+			}
+		);
+	}
+}
+
+export default StaffRoutes;

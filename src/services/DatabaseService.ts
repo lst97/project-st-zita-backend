@@ -1,20 +1,23 @@
-import { Service } from 'typedi';
 import sqlite3, { Database } from 'sqlite3';
-import * as DbConstants from '../constants/DatabaseConstants';
 import { DatabaseError, IErrorHandlerService } from '@lst97/common_response';
+import { inject, injectable } from 'inversify';
+import appConfig from '../configs/config';
 
-@Service()
+@injectable()
 export class DatabaseService {
 	private db: sqlite3.Database;
 
 	constructor() {
-		this.db = new sqlite3.Database(DbConstants.CONNECTION_STRING, (err) => {
-			if (err) {
-				console.error('Error opening database', err);
-				throw err; // Consider handling this error more gracefully
+		this.db = new sqlite3.Database(
+			appConfig.database.connectionString,
+			(err) => {
+				if (err) {
+					console.error('Error opening database', err);
+					throw err; // Consider handling this error more gracefully
+				}
+				console.log('Database connection established');
 			}
-			console.log('Database connection established');
-		});
+		);
 
 		// exit application
 		process.on('SIGINT', this.closeConnection.bind(this));
@@ -145,13 +148,14 @@ function rollbackTransactionAsync(db: Database): Promise<void> {
 	});
 }
 
-@Service()
 /**
  * Service for executing SQL queries with error handling using SQLite3.
  */
+@injectable()
 export class SQLite3QueryService {
 	constructor(
 		private databaseService: DatabaseService,
+		@inject('ErrorHandlerService')
 		private errorHandlerService: IErrorHandlerService
 	) {}
 

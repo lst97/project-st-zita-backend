@@ -1,17 +1,18 @@
 import { Request, Response } from 'express';
 import { StaffAppointmentService } from '../../services/scheduler/StaffAppointmentService';
 import { AppointmentData } from '../../models/share/scheduler/StaffAppointmentData';
-import { Service } from 'typedi';
 import { CreateShareLinkForm } from '../../models/forms/scheduler/CreateShareLinkForm';
 import { IErrorHandlerService, IResponseService } from '@lst97/common_response';
 import { ExportAsExcelForm } from '../../models/forms/scheduler/ExportAsExcelForm';
+import { injectable, inject } from 'inversify';
 
-@Service()
+@injectable()
 export class StaffAppointmentController {
 	constructor(
 		private appointmentService: StaffAppointmentService,
+		@inject('ErrorHandlerService')
 		private errorHandlerService: IErrorHandlerService,
-		private responseService: IResponseService
+		@inject('ResponseService') private responseService: IResponseService
 	) {}
 
 	public async createAppointments(

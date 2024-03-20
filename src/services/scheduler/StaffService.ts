@@ -5,7 +5,6 @@ import {
 import StaffDbModel from '../../models/database/Staff';
 import StaffRepository from '../../repositories/scheduler/StaffRepository';
 import StaffDataSharedModel from '../../models/share/scheduler/StaffData';
-import { Inject, Service } from 'typedi';
 import { IErrorHandlerService } from '@lst97/common_response';
 import {
 	SqlRecordExistsError,
@@ -13,14 +12,15 @@ import {
 } from '@lst97/common_response/';
 import { StaffAppointmentService } from './StaffAppointmentService';
 import { SQLite3QueryService } from '../DatabaseService';
+import { inject, injectable } from 'inversify';
 
-@Service()
+@injectable()
 class StaffService {
 	constructor(
 		private staffRepository: StaffRepository,
 		private appointmentService: StaffAppointmentService,
 		private dbQueryService: SQLite3QueryService,
-		@Inject('ErrorHandlerService')
+		@inject('ErrorHandlerService')
 		private errorHandlerService: IErrorHandlerService
 	) {}
 

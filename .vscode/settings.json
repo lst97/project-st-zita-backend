@@ -5,6 +5,7 @@
 		"deepcode",
 		"dotfiles",
 		"exceljs",
+		"inversify",
 		"letsencrypt",
 		"magika",
 		"officedocument",

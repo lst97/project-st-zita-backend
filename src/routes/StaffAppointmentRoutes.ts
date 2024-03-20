@@ -1,68 +1,116 @@
 import express from 'express';
 import { StaffAppointmentController } from '../controllers/scheduler/StaffAppointmentController';
-import { Container } from 'typedi';
-import { verifyToken } from '../middleware/request/JwtMiddleware';
-import {
+import { JwtMiddlewareService } from '../middleware/request/JwtMiddleware';
+import RequestValidationMiddleware, {
 	RequestBodyValidationStrategy,
 	RequestParamValidationStrategy,
-	RequestQueryValidationStrategy,
-	requestValidator
+	RequestQueryValidationStrategy
 } from '../middleware/request/RequestValidationMiddleware';
 import { ShareAppointmentSchema } from '../schemas/ShareAppointmentSchema';
+import container from '../inversify.config';
+import { inject, injectable } from 'inversify';
 
-const router = express.Router();
+@injectable()
+class StaffAppointmentRoutes {
+	private router: express.Router;
 
-const staffAppointmentController = Container.get(StaffAppointmentController);
+	public get routers(): express.Router {
+		return this.router;
+	}
 
-router.get('/appointments/week_view/:id', verifyToken, (req, res) =>
-	staffAppointmentController.getAllAppointmentsByWeekViewId(req, res)
-);
+	constructor(
+		@inject(JwtMiddlewareService)
+		private jwtMiddlewareService: JwtMiddlewareService,
+		@inject(StaffAppointmentController)
+		private staffAppointmentController: StaffAppointmentController,
+		@inject(RequestValidationMiddleware)
+		private requestValidationMiddleware: RequestValidationMiddleware
+	) {
+		this.router = express.Router();
+		this.configureRoutes();
+	}
 
-router.post('/appointments', verifyToken, (req, res) =>
-	staffAppointmentController.createAppointments(req, res)
-);
+	public configureRoutes(): void {
+		this.router.get(
+			'/appointments/week_view/:id',
+			this.jwtMiddlewareService.verifyToken,
+			(req, res) =>
+				this.staffAppointmentController.getAllAppointmentsByWeekViewId(
+					req,
+					res
+				)
+		);
 
-router.delete('/appointments/week_view/:id', verifyToken, (req, res) =>
-	staffAppointmentController.deleteAllAppointmentsByWeekViewIdAndStaffName(
-		req,
-		res
-	)
-);
+		this.router.post(
+			'/appointments',
+			this.jwtMiddlewareService.verifyToken,
+			(req, res) =>
+				this.staffAppointmentController.createAppointments(req, res)
+		);
 
-router.post(
-	'/appointments/share',
-	verifyToken,
-	requestValidator(
-		new RequestBodyValidationStrategy(
-			ShareAppointmentSchema.createFormSchema
-		)
-	),
-	(req, res) => staffAppointmentController.createShareAppointments(req, res)
-);
+		this.router.delete(
+			'/appointments/week_view/:id',
+			this.jwtMiddlewareService.verifyToken,
+			(req, res) =>
+				this.staffAppointmentController.deleteAllAppointmentsByWeekViewIdAndStaffName(
+					req,
+					res
+				)
+		);
 
-// uuidv4&weekViewId=142024
-router.get(
-	'/shared_appointments/:id',
-	requestValidator(
-		new RequestParamValidationStrategy(
-			ShareAppointmentSchema.urlParamSchema
-		)
-	),
-	requestValidator(
-		new RequestQueryValidationStrategy(
-			ShareAppointmentSchema.urlQuerySchema
-		)
-	),
-	(req, res) => staffAppointmentController.getSharedAppointments(req, res)
-);
+		this.router.post(
+			'/appointments/share',
+			this.jwtMiddlewareService.verifyToken,
+			this.requestValidationMiddleware.requestValidator(
+				new RequestBodyValidationStrategy(
+					ShareAppointmentSchema.createFormSchema
+				)
+			),
+			(req, res) =>
+				this.staffAppointmentController.createShareAppointments(
+					req,
+					res
+				)
+		);
 
-router.post('/appointments/export/excel', verifyToken, (req, res) =>
-	// TODO: validation if the dates is a valid date (only 7 days is allowed to export)
-	staffAppointmentController.exportAppointmentsAsExcel(req, res)
-);
+		// uuidv4&weekViewId=142024
+		this.router.get(
+			'/shared_appointments/:id',
+			this.requestValidationMiddleware.requestValidator(
+				new RequestParamValidationStrategy(
+					ShareAppointmentSchema.urlParamSchema
+				)
+			),
+			this.requestValidationMiddleware.requestValidator(
+				new RequestQueryValidationStrategy(
+					ShareAppointmentSchema.urlQuerySchema
+				)
+			),
+			(req, res) =>
+				this.staffAppointmentController.getSharedAppointments(req, res)
+		);
 
-router.delete('/appointments', verifyToken, (req, res) =>
-	staffAppointmentController.deleteAppointmentByDateAndStaffName(req, res)
-);
+		this.router.post(
+			'/appointments/export/excel',
+			this.jwtMiddlewareService.verifyToken,
+			(req, res) =>
+				// TODO: validation if the dates is a valid date (only 7 days is allowed to export)
+				this.staffAppointmentController.exportAppointmentsAsExcel(
+					req,
+					res
+				)
+		);
 
-export default router;
+		this.router.delete(
+			'/appointments',
+			this.jwtMiddlewareService.verifyToken,
+			(req, res) =>
+				this.staffAppointmentController.deleteAppointmentByDateAndStaffName(
+					req,
+					res
+				)
+		);
+	}
+}
+
+export default StaffAppointmentRoutes;

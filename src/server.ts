@@ -1,55 +1,87 @@
 import 'reflect-metadata';
+
 import express from 'express';
 import helmet from 'helmet';
-import staffRoutes from './routes/StaffRoutes';
-import appointmentRoutes from './routes/StaffAppointmentRoutes';
-import authenticationRoutes from './routes/AuthenticateRoutes';
-import { API_ENDPOINT, PORT } from './constants/ServerConstants';
 import cors from 'cors';
-import fs from 'fs';
+import appConfig, { IAppConfig } from './configs/config';
+import { RequestHeaderMiddleware } from './middleware/request/RequestHeaderMiddleware';
+import container from './inversify.config';
+import StaffRoutes from './routes/StaffRoutes';
+import StaffAppointmentRoutes from './routes/StaffAppointmentRoutes';
+import AuthenticateRoutes from './routes/AuthenticateRoutes';
+import Credentials from './configs/credentials';
 import https from 'https';
-import { requestId } from './middleware/request/RequestIdMiddleware';
 
-const app = express();
+/**
+ * The App class represents the main application.
+ * It is responsible for configuring the express application, setting up routes, and starting the server.
+ *
+ * @class
+ */
+class App {
+	private app: express.Application;
+	private appConfig: IAppConfig;
 
-// Certificate
-const privateKey = fs.readFileSync(
-	'/etc/letsencrypt/live/lst97.tplinkdns.com/privkey.pem',
-	'utf8'
-);
-const certificate = fs.readFileSync(
-	'/etc/letsencrypt/live/lst97.tplinkdns.com/cert.pem',
-	'utf8'
-);
-const ca = fs.readFileSync(
-	'/etc/letsencrypt/live/lst97.tplinkdns.com/chain.pem',
-	'utf8'
-);
+	public get Config(): IAppConfig {
+		return this.appConfig;
+	}
 
-const credentials = {
-	key: privateKey,
-	cert: certificate,
-	ca: ca
-};
+	constructor() {
+		this.app = express();
+		this.appConfig = appConfig;
+		this.config();
+		this.routes();
+	}
 
-app.use(helmet());
+	public getApp(): express.Application {
+		return this.app;
+	}
 
-app.use(cors());
+	private config(): void {
+		this.app.use(helmet());
+		this.app.use(cors());
+		this.app.use(express.json());
+		this.app.use(RequestHeaderMiddleware.requestId);
+	}
 
-app.use(express.json());
+	private routes(): void {
+		this.app.use(
+			`${appConfig.apiEndpoint}`,
+			container.get(StaffRoutes).routers
+		);
+		this.app.use(
+			`${appConfig.apiEndpoint}`,
+			container.get(StaffAppointmentRoutes).routers
+		);
+		this.app.use(
+			`${appConfig.apiEndpoint}`,
+			container.get(AuthenticateRoutes).routers
+		);
+	}
 
-app.use(requestId);
+	public listen(port: number, callback: () => void): void {
+		if (this.appConfig.environment === 'production') {
+			const httpsServer = https.createServer(
+				new Credentials().tls,
+				this.app
+			);
+			httpsServer.listen(`${appConfig.port}`, callback);
+		} else if (this.appConfig.environment === 'development') {
+			this.app.listen(port, callback);
+		} else {
+			throw new Error('Environment not set');
+		}
+	}
+}
 
-app.use(`${API_ENDPOINT}`, staffRoutes);
-app.use(`${API_ENDPOINT}`, appointmentRoutes);
-app.use(`${API_ENDPOINT}`, authenticationRoutes);
+const app = new App();
+const port = app.Config.port;
+const environment = app.Config.environment;
 
-const httpsServer = https.createServer(credentials, app);
-
-httpsServer.listen(`${PORT}`, () => {
-	console.log(`Server running on port ${PORT}`);
+app.listen(port, () => {
+	console.log(`(${environment}) Server is running on port ${port}`);
 });
 
-function csrf(): any {
-	throw new Error('Function not implemented.');
-}
+// function csrf(): any {
+// 	throw new Error('Function not implemented.');
+// }

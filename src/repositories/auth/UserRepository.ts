@@ -2,7 +2,6 @@ import {
 	DatabaseService,
 	SQLite3QueryService
 } from '../../services/DatabaseService';
-import { Service } from 'typedi';
 import IUserRepository from './interfaces/IUserRepository';
 import UserDbModel from '../../models/database/User';
 import {
@@ -11,12 +10,13 @@ import {
 	SqlReadError,
 	SqlUpdateError
 } from '@lst97/common_response';
+import { inject, injectable } from 'inversify';
 
-@Service()
+@injectable()
 class UserRepository implements IUserRepository {
 	constructor(
-		private databaseService: DatabaseService,
-		private queryService: SQLite3QueryService
+		@inject(DatabaseService) private databaseService: DatabaseService,
+		@inject(SQLite3QueryService) private queryService: SQLite3QueryService
 	) {}
 	async findByEmail(email: string): Promise<UserDbModel | null> {
 		return (await this.queryService.getWithSqlErrorHandlingAsync(
